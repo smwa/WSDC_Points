@@ -15,3 +15,31 @@ img.full-bg {
 img.full-bg.transitioning {
   opacity: 0;
 }
+
+a.main-nav-button {
+  color: white;
+  text-decoration: none;
+}
+
+.main-nav-button {
+  position: fixed;
+  background-color: black;
+  opacity: 0.5;
+  border-radius: 100%;
+  z-index: 1000;
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  top: calc(50vh - 1.5rem);
+  border: 1px solid white;
+}
+
+.main-nav-button.previous {
+  left: 1rem;
+}
+
+.main-nav-button.next {
+  right: 1rem;
+}

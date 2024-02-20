@@ -194,7 +194,7 @@ database["top_dancers_by_points_gained_recently"] = sorted_roles
 
 # Past events that may be coming back up
 min_date = (datetime.date.today().replace(day=1) - datetime.timedelta(days=(30 * 12))).replace(day=1) # 12 months ago
-max_date = (datetime.date.today().replace(day=1) - datetime.timedelta(days=(30 * 10))).replace(day=1) # 10 months ago
+max_date = (datetime.date.today().replace(day=1) - datetime.timedelta(days=(30 * 11))).replace(day=1) # 11 months ago
 
 for event in database['events']:
   valid_dates = [d for d in event['dates'] if datetime.date.fromisoformat(d) >= min_date and datetime.date.fromisoformat(d) <= max_date]

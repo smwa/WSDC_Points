@@ -1,0 +1,16 @@
+<app-template-one [isLoaded]="is_loaded">
+  <span>Upcoming events, based on last year</span>
+  
+  <div class="upcoming-events">
+    <div *ngFor="let event of get_events()">
+      <h4>
+        <a *ngIf="event?.url" target="_blank" [href]="event?.url">{{ event?.name }}</a>
+        <span *ngIf="!(event?.url)">
+          {{ event?.name }}
+        </span>
+        <small> {{ event?.location }}</small>
+      </h4>
+    </div>
+  </div>
+
+</app-template-one>
