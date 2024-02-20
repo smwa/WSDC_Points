@@ -1,0 +1,17 @@
+:host {
+  position: relative;
+}
+
+img.full-bg {
+  top: 0;
+  left: 0;
+  position: fixed;
+  object-fit: cover;
+  width: 100vw;
+  height: 100lvh;
+  transition: opacity linear 300ms;
+}
+
+img.full-bg.transitioning {
+  opacity: 0;
+}
