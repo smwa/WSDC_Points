@@ -1,29 +1,32 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Database, DatabaseFetcherService } from '../database-fetcher.service';
+import { CommonModule } from '@angular/common';
+import { TemplateOneComponent } from '../template-one/template-one.component';
 
 @Component({
   selector: 'app-stats-overview',
   standalone: true,
-  imports: [],
+  imports: [
+    CommonModule,
+    TemplateOneComponent
+  ],
   templateUrl: './stats-overview.component.html',
   styleUrl: './stats-overview.component.scss'
 })
-export class StatsOverviewComponent implements OnInit, OnDestroy {
+export class StatsOverviewComponent implements OnInit {
 
   database: Database|undefined;
   is_loaded = false;
 
-  constructor(private databaseFetcher: DatabaseFetcherService) {
-    
-  }
-  ngOnDestroy(): void {
-    this.is_loaded = false;
-  }
+  constructor(private databaseFetcher: DatabaseFetcherService) { }
 
   ngOnInit() {
+    this.is_loaded = false;
     this.databaseFetcher.database.subscribe((db) => {
       this.database = db;
-      this.is_loaded = true;
+      setTimeout(() => {
+        this.is_loaded = true;
+      }, 0)
     });
   }
 

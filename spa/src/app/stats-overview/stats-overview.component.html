@@ -1,5 +1,5 @@
-<div class="shaded-content" [class]="is_loaded ? 'loaded' : ''">
+<app-template-one [isLoaded]="is_loaded">
   <span>Updated {{ get_last_updated() }}</span>
   <span>{{ get_number_of_dancers() }} Dancers</span>
   <span>{{ get_number_of_events() }} Events</span>
-</div>
+</app-template-one>
