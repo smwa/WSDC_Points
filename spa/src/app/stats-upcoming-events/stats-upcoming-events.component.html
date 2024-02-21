@@ -1,7 +1,7 @@
 <app-template-one [isLoaded]="is_loaded">
-  <span>Upcoming events, based on last year</span>
   
   <div class="upcoming-events">
+    <div>Upcoming events, based on last year</div>
     <div *ngFor="let event of get_events()">
       <h4>
         <a [routerLink]="'/events/' + event?.id">{{ event?.name }}</a>
