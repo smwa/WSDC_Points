@@ -2,13 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { Database, DatabaseFetcherService } from '../database-fetcher.service';
 import { CommonModule } from '@angular/common';
 import { TemplateOneComponent } from '../template-one/template-one.component';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-stats-overview',
   standalone: true,
   imports: [
     CommonModule,
-    TemplateOneComponent
+    RouterModule,
+    TemplateOneComponent,
   ],
   templateUrl: './stats-overview.component.html',
   styleUrl: './stats-overview.component.scss'

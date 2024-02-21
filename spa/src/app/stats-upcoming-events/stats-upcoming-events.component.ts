@@ -2,13 +2,15 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { TemplateOneComponent } from '../template-one/template-one.component';
 import { Database, DatabaseFetcherService } from '../database-fetcher.service';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-stats-upcoming-events',
   standalone: true,
   imports: [
     CommonModule,
-    TemplateOneComponent
+    TemplateOneComponent,
+    RouterModule,
   ],
   templateUrl: './stats-upcoming-events.component.html',
   styleUrl: './stats-upcoming-events.component.scss'

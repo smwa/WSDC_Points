@@ -6,7 +6,12 @@
   overflow-y: scroll;
 }
 
+.upcoming-events h4 {
+  margin: 0;
+}
+
 .upcoming-events > * {
+  padding: 1rem 0 1rem 0;
   flex: 0;
   border-bottom: 1px solid #aaaaaa;
 }

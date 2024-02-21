@@ -4,12 +4,10 @@
   <div class="upcoming-events">
     <div *ngFor="let event of get_events()">
       <h4>
-        <a *ngIf="event?.url" target="_blank" [href]="event?.url">{{ event?.name }}</a>
-        <span *ngIf="!(event?.url)">
-          {{ event?.name }}
-        </span>
-        <small> {{ event?.location }}</small>
+        <a [routerLink]="'/events/' + event?.id">{{ event?.name }}</a>
       </h4>
+      <a *ngIf="event?.url" target="_blank" [href]="event?.url">{{ event?.url }}</a>
+      {{ event?.location }}
     </div>
   </div>
 
