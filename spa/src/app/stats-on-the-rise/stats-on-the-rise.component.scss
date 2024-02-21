@@ -3,11 +3,9 @@
 }
 
 .divisions {
-  width: calc(100% - 1rem);
   display: flex;
   flex-direction: column;
-  // width: 100%;
-  padding: 0 2rem 0 2rem;
+  width: 100%;
   overflow-y: scroll;
 }
 
@@ -33,9 +31,4 @@ h6, h5, h4, h3, h2, h1 {
 
 .role {
   flex: 1;
-}
-
-:host a {
-  color: white;
-  text-decoration: underline;
 }
