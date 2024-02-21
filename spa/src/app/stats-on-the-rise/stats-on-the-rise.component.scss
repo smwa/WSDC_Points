@@ -1,0 +1,41 @@
+:host {
+  width: 100%;
+}
+
+.divisions {
+  width: calc(100% - 1rem);
+  display: flex;
+  flex-direction: column;
+  // width: 100%;
+  padding: 0 2rem 0 2rem;
+  overflow-y: scroll;
+}
+
+h1, h2, h3 {
+  color: white;
+}
+
+h6, h5, h4, h3, h2, h1 {
+  margin: 0;
+}
+
+.division {
+  padding: 1rem 0 1rem 0;
+  flex: 0;
+  border-bottom: 1px solid #aaaaaa;
+}
+
+.roles {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+}
+
+.role {
+  flex: 1;
+}
+
+:host a {
+  color: white;
+  text-decoration: underline;
+}

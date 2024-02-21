@@ -17,17 +17,17 @@ ROLES_MAP = {
 }
 DIVISIONS_MAP = {
     12: 'Teacher',
-    11: 'Advanced',
-    10: 'Masters',
-    9: 'Novice',
-    8: 'Intermediate',
-    7: 'Champions',
-    6: 'Invitational',
-    5: 'All-Stars',
-    4: 'Sophisticated',
-    3: 'Professional',
-    2: 'Juniors',
-    1: 'Newcomer',
+    11: 'All-Stars',
+    10: 'Champions',
+    9: 'Invitational',
+    8: 'Sophisticated',
+    7: 'Professional',
+    6: 'Advanced',
+    5: 'Intermediate',
+    4: 'Novice',
+    3: 'Newcomer',
+    2: 'Masters',
+    1: 'Juniors',
 }
 ROLES_MAP_INVERTED = dict((v, k) for k, v in ROLES_MAP.items())
 DIVISIONS_MAP_INVERTED = dict((v, k) for k, v in DIVISIONS_MAP.items())
@@ -165,7 +165,7 @@ for datum in raw_response_dancers:
 min_date = (datetime.date.today().replace(day=1) - datetime.timedelta(days=180)).replace(day=1) # 6 months ago
 from_each_group = 5
 
-roles = {} # [leader/follower][novice/beginner/advanced][wscdid] = points
+divisions = {} # [novice/beginner/advanced][leader/follower] = {wscid: int, points: int}[]
 
 for dancer in database["dancers"]:
     for placement in dancer["placements"]:
@@ -174,22 +174,45 @@ for dancer in database["dancers"]:
         _points = placement["points"]
         _division = placement["division"]
         _role = placement["role"]
-        if _role not in roles:
-            roles[_role] = {}
-        if _division not in roles[_role]:
-            roles[_role][_division] = {}
-        if dancer['id'] not in roles[_role][_division]:
-            roles[_role][_division][dancer['id']] = 0
-        roles[_role][_division][dancer['id']] += _points
+        if _division not in divisions:
+            divisions[_division] = {}
+        if _role not in divisions[_division]:
+            divisions[_division][_role] = {}
+        if dancer['id'] not in divisions[_division][_role]:
+            divisions[_division][_role][dancer['id']] = 0
+        divisions[_division][_role][dancer['id']] += _points
 
-sorted_roles = {}
-for role in roles:
-    sorted_roles[role] = {}
-    for division in roles[role]:
-        chunked_sorted = sorted(roles[role][division].items(), key=lambda item: item[1], reverse=True)[0:from_each_group]
-        sorted_roles[role][division] = [d[0] for d in chunked_sorted]
+sorted_divisions = {}
+for division in divisions:
+    sorted_divisions[division] = {}
+    for role in divisions[division]:
+        chunked_sorted = sorted(divisions[division][role].items(), key=lambda item: item[1], reverse=True)[0:from_each_group]
+        sorted_divisions[division][role] = {d[0]: d[1] for d in chunked_sorted}
 
-database["top_dancers_by_points_gained_recently"] = sorted_roles
+unkeyed_by_division = []
+for division in sorted_divisions:
+  unkeyed_division = {
+    'division': division,
+    'roles': [],
+  }
+  for role in sorted_divisions[division]:
+    unkeyed_role = {
+      'role': role,
+      'dancers': [],
+    }
+    for dancer_id in sorted_divisions[division][role]:
+      unkeyed_dancer = {
+        'points': sorted_divisions[division][role][dancer_id],
+        'wscdid': dancer_id,
+      }
+      unkeyed_role['dancers'].append(unkeyed_dancer)
+    unkeyed_role['dancers'] = sorted(unkeyed_role['dancers'], key=lambda dancer: dancer['points'], reverse=True)
+    unkeyed_division['roles'].append(unkeyed_role)
+  unkeyed_division['roles'] = sorted(unkeyed_division['roles'], key=lambda role: role['role'])
+  unkeyed_by_division.append(unkeyed_division)
+unkeyed_by_division = sorted(unkeyed_by_division, key=lambda division: division['division'], reverse=True)
+
+database["top_dancers_by_points_gained_recently"] = unkeyed_by_division
 
 
 # Past events that may be coming back up

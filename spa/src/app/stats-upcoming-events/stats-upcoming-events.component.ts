@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { TemplateOneComponent } from '../template-one/template-one.component';
 import { Database, DatabaseFetcherService } from '../database-fetcher.service';
 import { RouterModule } from '@angular/router';
@@ -15,7 +15,7 @@ import { RouterModule } from '@angular/router';
   templateUrl: './stats-upcoming-events.component.html',
   styleUrl: './stats-upcoming-events.component.scss'
 })
-export class StatsUpcomingEventsComponent {
+export class StatsUpcomingEventsComponent implements OnInit {
   database: Database|undefined;
   is_loaded = false;
 

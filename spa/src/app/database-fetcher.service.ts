@@ -54,7 +54,7 @@ type IncomingDatabase = {
   divisions: {[id: string]: string},
   dancers: IncomingDancer[],
   events: IncomingEvent[],
-  top_dancers_by_points_gained_recently: {[id: string]: {[id: string]: number[]}},
+  top_dancers_by_points_gained_recently: {division: number, roles: {role: number, dancers: {points: number, wscdid: number}[]}[]}[],
   past_events_that_may_be_recurring: number[],
 };
 
@@ -64,7 +64,7 @@ export type Database = {
   divisions: {[id: string]: string},
   dancers: Dancer[],
   events: Event[],
-  top_dancers_by_points_gained_recently: {[id: string]: {[id: string]: number[]}},
+  top_dancers_by_points_gained_recently: {division: number, roles: {role: number, dancers: {points: number, wscdid: number}[]}[]}[],
   past_events_that_may_be_recurring: number[],
 };
 

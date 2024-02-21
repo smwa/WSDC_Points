@@ -1,0 +1,28 @@
+<app-template-one [isLoaded]="is_loaded">
+
+  <div class="divisions">
+    <h2>Dancers On The Rise</h2>
+    <div class="division" *ngFor="let division of onTheRise()">
+
+      <h3>{{ get_division(division.division) }}</h3>
+      <div class="roles">
+        <div class="role" *ngFor="let role of division.roles">
+          <h5>{{ get_role(role.role) }}</h5>
+
+          <div class="dancers">
+            <div class="dancer" *ngFor="let dancer of role.dancers">
+              <h6>
+                <a [routerLink]="'/dancers/' + dancer.wscdid">
+                  {{ get_dancer(dancer.wscdid).first }} {{ get_dancer(dancer.wscdid).last }}
+                </a>
+              </h6>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</app-template-one>
