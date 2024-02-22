@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { Component } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router, RouterModule, RouterOutlet } from '@angular/router';
 
@@ -20,7 +20,7 @@ export class AppComponent {
   background_image = '';
   transitioning_timeout = setTimeout(() => {}, 0);
 
-  constructor(router: Router, route: ActivatedRoute) {
+  constructor(router: Router, route: ActivatedRoute, private location: Location) {
 
     router.events.subscribe((val) => {
       if (val instanceof NavigationEnd) {
@@ -41,5 +41,9 @@ export class AppComponent {
       }
     })
 
+  }
+
+  goback() {
+    this.location.back();
   }
 }

@@ -10,7 +10,7 @@ import { Component, Input } from '@angular/core';
   animations: [
     trigger('contentSlide', [
       transition(':enter', style({ bottom: '-14rem' })),
-      transition('* => true', [style({ bottom: '-14rem' }), animate('1200ms ease-in-out', style({ bottom: 0 }))]),
+      transition('* => true', [style({ bottom: '-14rem' }), animate('1000ms ease-out', style({ bottom: 0 }))]),
       state('false', style({ bottom: '-14rem' })),
       state('true', style({ bottom: 0 })),
     ])

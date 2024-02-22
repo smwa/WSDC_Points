@@ -33,6 +33,12 @@ a.main-nav-button {
   justify-content: center;
   top: 1rem;
   border: 1px solid white;
+  color: white;
+  font-size: 1rem;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  box-sizing: border-box;
 }
 
 .main-nav-button.previous {

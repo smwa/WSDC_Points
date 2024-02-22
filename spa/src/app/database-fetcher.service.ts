@@ -25,7 +25,7 @@ type IncomingDancer = {
   }[],
 };
 
-type Dancer = {
+export type Dancer = {
   id: number,
   pro: boolean,
   first: string,
@@ -40,7 +40,7 @@ type Dancer = {
   }[],
 };
 
-type Event = {
+export type Event = {
   id: number,
   name: string,
   location: string,
