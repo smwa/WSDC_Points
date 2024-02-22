@@ -1,13 +1,11 @@
 import requests
 import json
-from time import sleep
 from os import walk
-from pathlib import Path
 import json
 import datetime
 
 API_URL = "https://points.worldsdc.com/lookup2020/find"
-NONE_SLIDE_LIMIT = 10
+NONE_SLIDE_LIMIT = 200
 RAW_RESPONSE_DIR = './raw'
 LIMIT_TO_DANCE_STYLE = 'West Coast Swing'
 ROLES_MAP = {
@@ -44,7 +42,7 @@ def get_dancer(wsdc_id: str):
   return json
 
 def get_all_dancers():
-    current_wsdc_id = 0
+    current_wsdc_id = 5948
     none_slide = 0
 
     while True:
@@ -64,7 +62,7 @@ def get_all_dancers():
       current_wsdc_id += 1
       # sleep(1)
 
-# get_all_dancers() # TODO Uncomment
+get_all_dancers()
 
 filenames = next(walk('{}/'.format(RAW_RESPONSE_DIR)), (None, None, []))[2]
 filenames.sort()
