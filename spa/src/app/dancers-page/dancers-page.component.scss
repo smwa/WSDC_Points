@@ -1,0 +1,12 @@
+.dancers {
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+  width: 100%;
+}
+
+.dancers > * {
+  padding: 0.5rem 0 0.5rem 0;
+  flex: 0;
+  border-bottom: 1px solid #aaaaaa;
+}

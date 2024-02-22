@@ -1,0 +1,11 @@
+<app-template-one [isLoaded]="is_loaded">
+  <div class="events">
+    <h2>Events</h2>
+    <input type="text" placeholder="Search" #search (keyup)="on_search_type(search.value)" />
+    <div *ngFor="let event of get_events()">
+      <a [routerLink]="'/events/' + event.id">
+        {{ event.name }} <small>{{ event.location }}</small>
+      </a>
+    </div>
+  </div>
+</app-template-one>
