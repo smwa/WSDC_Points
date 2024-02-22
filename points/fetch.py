@@ -62,7 +62,7 @@ def get_all_dancers():
         with open("{}/{:05d}.json".format(RAW_RESPONSE_DIR, current_wsdc_id), 'w') as f:
           json.dump(res, f)
       current_wsdc_id += 1
-      sleep(1)
+      # sleep(1)
 
 # get_all_dancers() # TODO Uncomment
 
