@@ -1,5 +1,6 @@
 import requests
 import json
+from pathlib import Path
 from os import walk
 import json
 import datetime
@@ -29,6 +30,8 @@ DIVISIONS_MAP = {
 }
 ROLES_MAP_INVERTED = dict((v, k) for k, v in ROLES_MAP.items())
 DIVISIONS_MAP_INVERTED = dict((v, k) for k, v in DIVISIONS_MAP.items())
+
+Path(RAW_RESPONSE_DIR).mkdir(parents=True, exist_ok=True)
 
 def get_dancer(wsdc_id: str):
   r = requests.post(API_URL, data = {'num': wsdc_id})
@@ -60,7 +63,6 @@ def get_all_dancers():
         with open("{}/{:05d}.json".format(RAW_RESPONSE_DIR, current_wsdc_id), 'w') as f:
           json.dump(res, f)
       current_wsdc_id += 1
-      # sleep(1)
 
 get_all_dancers()
 
