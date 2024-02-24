@@ -45,7 +45,7 @@ def get_dancer(wsdc_id: str):
   return json
 
 def get_all_dancers():
-    current_wsdc_id = 5948
+    current_wsdc_id = 1
     none_slide = 0
 
     while True:
