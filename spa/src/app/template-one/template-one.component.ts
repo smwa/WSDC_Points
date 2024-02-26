@@ -9,10 +9,10 @@ import { Component, Input } from '@angular/core';
   styleUrl: './template-one.component.scss',
   animations: [
     trigger('contentSlide', [
-      transition(':enter', style({ bottom: '-14rem' })),
-      transition('* => true', [style({ bottom: '-14rem' }), animate('1000ms ease-out', style({ bottom: 0 }))]),
-      state('false', style({ bottom: '-14rem' })),
-      state('true', style({ bottom: 0 })),
+      transition(':enter', style({ marginTop: '110vh' })),
+      transition('* => true', [style({ marginTop: '110vh' }), animate('1000ms ease-out', style({ marginTop: '80vh' }))]),
+      state('false', style({ marginTop: '110vh' })),
+      state('true', style({ marginTop: '80vh' })),
     ])
   ],
 })
