@@ -6,9 +6,10 @@
 
 .shaded-content {
   width: 24rem;
-  min-height: 20vh;
+  min-height: 15rem;
   max-width: 100%;
-  margin-top: 110vh;
+  margin-top: 0vh; // Handle lack of svh support
+  margin-top: 100lvh;
   padding: 0.2rem 1rem 0.2rem 1rem;
   transform: translate(calc(50vw - min(24rem, 100vw)/2), 0);
   border-radius: 10px;

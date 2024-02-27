@@ -10,7 +10,7 @@ html {
   color: #dddddd;
   font-size: 28px;
   font-family: Verdana, Geneva, Tahoma, sans-serif;
-  height: 100vh;
+  height: 100vh; // Fallback for lvh
   height: 100lvh;
   width: 100vw;
 }
