@@ -33,5 +33,5 @@ jobs:
           cd points
           python fetch.py
 
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
+      - name: Commit and Push
+        uses: EndBug/add-and-commit@v9
