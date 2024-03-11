@@ -60,4 +60,32 @@ export class DancerPageComponent implements OnInit {
     if (parseInt(placement, 10) > 1) return `${placement}th`;
     return placement;
   }
+
+  getPointsByDivision(): {role: string, division: string, points: number}[] {
+    const byDivision: {role: string, division: string, points: number}[] = [];
+
+    this.dancer?.placements.forEach((placement) => {
+      const division = this.database?.divisions[placement.division];
+      const role = this.database?.roles[placement.role];
+      const points = placement.points;
+      let added = false;
+      byDivision.forEach((byDivisionItem) => {
+        if (byDivisionItem.division === division && byDivisionItem.role === role) {
+          byDivisionItem.points += points;
+          added = true;
+        }
+      });
+      if (!added) {
+        byDivision.push({
+          division: division || 'Unknown',
+          role: role || 'Unknown',
+          points: points,
+        });
+      }
+    });
+
+    byDivision.reverse();
+
+    return byDivision;
+  }
 }

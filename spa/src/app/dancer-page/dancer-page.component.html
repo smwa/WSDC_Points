@@ -7,6 +7,19 @@
 
     <h3 *ngIf="dancer.pro">Pro</h3>
 
+    <table>
+      <tr>
+        <th>Points</th>
+        <th>Division</th>
+        <th>Role</th>
+      </tr>
+      <tr *ngFor="let byDivisionItem of getPointsByDivision()">
+        <td>{{ byDivisionItem.points }}</td>
+        <td>{{ byDivisionItem.division }}</td>
+        <td>{{ byDivisionItem.role }}</td>
+      </tr>
+    </table>
+
     <div class="placements">
 
       <div *ngFor="let placement of dancer.placements">
