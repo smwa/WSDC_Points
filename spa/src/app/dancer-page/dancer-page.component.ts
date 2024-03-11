@@ -84,8 +84,6 @@ export class DancerPageComponent implements OnInit {
       }
     });
 
-    byDivision.reverse();
-
     return byDivision;
   }
 }

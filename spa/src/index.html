@@ -7,6 +7,8 @@
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/png" href="favicon.png">
+  <meta name="theme-color" content="#062C06">
+  <link rel="manifest" href="manifest.json">
 
   <link rel="preload" href="assets/img/swing_feet.jpg" as="image">
   <link rel="preload" href="assets/img/swingfling.jpg" as="image">
@@ -32,6 +34,12 @@
   <meta name="twitter:title" content="WSDC Points">
   <meta name="twitter:description" content="See West Coast Swing WSDC points for various dancers and see past official events.">
   <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+  
+  <script>
+    if('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    };
+  </script>
 
 </head>
 <body>

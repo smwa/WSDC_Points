@@ -1,0 +1,27 @@
+{
+  "short_name": "WSDC Points",
+  "name": "West Coast Swing Dance Points",
+  "icons": [
+    {
+      "src": "/assets/icons/themed-mask-icon.png",
+      "sizes": "192x192 256x256 512x512",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/assets/icons/apple-mask-icon.svg",
+      "sizes": "192x192 256x256 512x512",
+      "purpose": "monochrome"
+    },
+    {
+      "src": "/assets/icons/favicon.png",
+      "type": "image/png",
+      "sizes": "48x48 96x96 128x128 180x180 192x192 256x256"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#000000",
+  "display": "fullscreen",
+  "scope": "/",
+  "theme_color": "#062C06",
+  "description": "See WSDC points per dancer and various stats."
+}
