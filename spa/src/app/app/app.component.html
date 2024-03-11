@@ -1,5 +1,5 @@
 
-<img class="full-bg" [class]="swap_class" [src]="background_image" />
+<img class="full-bg" [class]="swap_class" [src]="background_image" alt="" />
 <a class="previous main-nav-button" [routerLink]="prev_link" *ngIf="prev_link && prev_link !== '_'">&lt;</a>
 <button type="button" class="previous main-nav-button" (click)="goback()" *ngIf="prev_link && prev_link === '_'">&lt;</button>
 <a class="next main-nav-button" [routerLink]="next_link" *ngIf="next_link">&gt;</a>
