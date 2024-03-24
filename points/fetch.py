@@ -4,6 +4,7 @@ from pathlib import Path
 from os import walk
 import json
 import datetime
+import msgpack
 
 API_URL = "https://points.worldsdc.com/lookup2020/find"
 NONE_SLIDE_LIMIT = 200
@@ -64,7 +65,7 @@ def get_all_dancers():
           json.dump(res, f)
       current_wsdc_id += 1
 
-get_all_dancers()
+# get_all_dancers()
 
 filenames = next(walk('{}/'.format(RAW_RESPONSE_DIR)), (None, None, []))[2]
 filenames.sort()
@@ -225,5 +226,6 @@ for event in database['events']:
     database["past_events_that_may_be_recurring"].append(event['id'])
 
 # Write to file, leave at bottom of this script
-with open("../spa/src/assets/database.json", 'w') as f:
-    json.dump(database, f)
+with open("../spa/src/assets/database.msgpack", 'bw') as f:
+    contents = msgpack.packb(database)
+    f.write(contents)

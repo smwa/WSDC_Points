@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { decode, decodeAsync } from "@msgpack/msgpack";
 import { map } from 'rxjs';
 
 type IncomingEvent = {
@@ -73,7 +74,11 @@ export type Database = {
 })
 export class DatabaseFetcherService {
 
-  database = this.http.get<IncomingDatabase>('assets/database.json').pipe(map((database) => {
+  database = this.http.get<ArrayBuffer>('assets/database.msgpack', { responseType: 'arraybuffer' as 'json', observe: 'response' }).pipe(map((_database) => {
+
+    if (_database.body == null) return;
+
+    const database = decode(_database.body) as IncomingDatabase;
     const db: Database = {
       ...database,
       last_updated: new Date(database.last_updated),
