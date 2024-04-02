@@ -1,5 +1,7 @@
 const cacheName = 'static_site_cache_v1';
 
+self.addEventListener("install", (event) => {});
+
 self.addEventListener('fetch', (event) => {
   event.respondWith(caches.open(cacheName).then((cache) => {
     return cache.match(event.request).then((cachedResponse) => {
