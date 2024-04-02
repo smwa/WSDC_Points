@@ -36,9 +36,25 @@
   <!-- Meta Tags Generated via https://www.opengraph.xyz -->
   
   <script>
-    if('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('serviceworker.js');
+    const registerServiceWorker = async () => {
+      if ("serviceWorker" in navigator) {
+        try {
+          const registration = await navigator.serviceWorker.register("/serviceworker.js", {
+            scope: "/",
+          });
+          if (registration.installing) {
+            console.log("Service worker installing");
+          } else if (registration.waiting) {
+            console.log("Service worker installed");
+          } else if (registration.active) {
+            console.log("Service worker active");
+          }
+        } catch (error) {
+          console.error(`Registration failed with ${error}`);
+        }
+      }
     };
+    registerServiceWorker();
   </script>
 
 <style>html,body{margin:0;border:0;padding:0}html{overflow:hidden;background-color:#000;color:#ddd;font-size:28px;font-family:Verdana,Geneva,Tahoma,sans-serif;height:100vh;height:100lvh;width:100vw}body{height:100%;padding-top:1px}
