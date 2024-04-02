@@ -1,15 +1,15 @@
-self.addEventListener('install', function(event) {
-  event.waitUntil(
-    caches.open('sw-cache').then(function(cache) {
-      return cache.add('index.html');
-    })
-  );
-});
- 
-self.addEventListener('fetch', function(event) {
-  event.respondWith(
-    caches.match(event.request).then(function(response) {
-      return response || fetch(event.request);
-    })
-  );
+const cacheName = 'static_site_cache_v1';
+
+self.addEventListener('fetch', (event) => {
+  event.respondWith(caches.open(cacheName).then((cache) => {
+    return cache.match(event.request).then((cachedResponse) => {
+      const fetchedResponse = fetch(event.request).then((networkResponse) => {
+        cache.put(event.request, networkResponse.clone());
+
+        return networkResponse;
+      });
+
+      return cachedResponse || fetchedResponse;
+    });
+  }));
 });
