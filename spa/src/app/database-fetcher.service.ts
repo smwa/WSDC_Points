@@ -57,6 +57,7 @@ type IncomingDatabase = {
   events: IncomingEvent[],
   top_dancers_by_points_gained_recently: {division: number, roles: {role: number, dancers: {points: number, wscdid: number}[]}[]}[],
   past_events_that_may_be_recurring: number[],
+  new_dancers_over_time: {key: string, value: number}[],
 };
 
 export type Database = {
@@ -67,6 +68,7 @@ export type Database = {
   events: Event[],
   top_dancers_by_points_gained_recently: {division: number, roles: {role: number, dancers: {points: number, wscdid: number}[]}[]}[],
   past_events_that_may_be_recurring: number[],
+  new_dancers_over_time: {key: string, value: number}[],
 };
 
 @Injectable({

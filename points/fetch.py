@@ -65,7 +65,7 @@ def get_all_dancers():
           json.dump(res, f)
       current_wsdc_id += 1
 
-# get_all_dancers()
+get_all_dancers()
 
 filenames = next(walk('{}/'.format(RAW_RESPONSE_DIR)), (None, None, []))[2]
 filenames.sort()
@@ -79,8 +79,9 @@ for f in filenames:
 def placementsToList(placements):
     final_placements = []
     final_events = []
+    earliest_event = None
     if type(placements) is list:
-        return (final_placements, final_events)
+        return (final_placements, final_events, earliest_event)
     for style_key in placements: # style_key is "West Coast Swing"
         if style_key != LIMIT_TO_DANCE_STYLE:
           continue
@@ -90,9 +91,12 @@ def placementsToList(placements):
             division_name = division["division"]["name"].title()
             division_name = DIVISIONS_MAP_INVERTED[division_name]
             for competition in division["competitions"]:
+                competition_date = datetime.datetime.strptime(competition["event"]["date"], '%B %Y')
+                if earliest_event is None or competition_date < earliest_event:
+                   earliest_event = competition_date
                 event = {
                     **competition["event"],
-                    "date": datetime.datetime.strptime(competition["event"]["date"], '%B %Y').date().isoformat()
+                    "date": competition_date.date().isoformat()
                 }
                 final_events.append(event)
                 role = competition["role"].title()
@@ -105,7 +109,7 @@ def placementsToList(placements):
                     "date": event["date"],
                     "division": division_name,
                 })
-    return (final_placements, final_events)
+    return (final_placements, final_events, earliest_event)
 
 database = {
     "last_updated": datetime.datetime.now().isoformat(),
@@ -115,6 +119,7 @@ database = {
     "events": [],
     'top_dancers_by_points_gained_recently': {},
     'past_events_that_may_be_recurring': [],
+    'new_dancers_over_time': [],
 }
 
 events = []
@@ -145,9 +150,26 @@ def addEvents(_events, new_events):
         event["url"] = new_event['url']
   return _events
 
+new_dancers_by_date = {}
+
+def addEarliestPlacement(dateOne: datetime.datetime|None, dateTwo: datetime.datetime|None):
+  if dateOne is None and dateTwo is None:
+    return
+  d = dateOne
+  if d is None:
+    d = dateTwo
+  if dateOne is not None and dateTwo is not None:
+    d = min(dateOne, dateTwo)
+
+  date_string = d.date().replace(month=1).isoformat() # Group by year only
+  if date_string not in new_dancers_by_date:
+    new_dancers_by_date[date_string] = 0
+  new_dancers_by_date[date_string] += 1
+
 for datum in raw_response_dancers:
     leader = placementsToList(datum["leader"]["placements"])
     follower = placementsToList(datum["follower"]["placements"])
+    addEarliestPlacement(leader[2], follower[2])
     res = {
       'id': datum['dancer_wsdcid'],
       'pro': datum["is_pro"] == 1,
@@ -160,6 +182,12 @@ for datum in raw_response_dancers:
         database["events"] = addEvents(database["events"], leader[1])
         database["events"] = addEvents(database["events"], follower[1])
 
+# Get how many new dancers by month
+new_dancers_over_time = [{'key': k, 'value': new_dancers_by_date[k]} for k in new_dancers_by_date.keys()]
+new_dancers_over_time.sort(key=lambda kv: datetime.date.fromisoformat(kv['key']))
+for kv in new_dancers_over_time:
+  kv['key'] = "{:'%y}".format(datetime.date.fromisoformat(kv['key']))
+database['new_dancers_over_time'] = new_dancers_over_time
 
 # Find "rising stars", top 5 for each role/division by points received in the last 6 months
 
