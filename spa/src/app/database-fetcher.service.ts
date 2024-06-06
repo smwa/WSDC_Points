@@ -107,7 +107,7 @@ export class DatabaseFetcherService {
       })),
     }
     console.log("Setting window.database, so you can dig into the data");
-    window.database = database;
+    window.database = db;
     return db;
   }));
 
