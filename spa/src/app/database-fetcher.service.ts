@@ -14,6 +14,7 @@ type IncomingEvent = {
 type IncomingDancer = {
   id: number,
   pro: boolean,
+  primary_role: number,
   first: string,
   last: string,
   placements: {
@@ -29,6 +30,7 @@ type IncomingDancer = {
 export type Dancer = {
   id: number,
   pro: boolean,
+  primary_role: number,
   first: string,
   last: string,
   placements: {
@@ -58,6 +60,7 @@ type IncomingDatabase = {
   top_dancers_by_points_gained_recently: {division: number, roles: {role: number, dancers: {points: number, wscdid: number}[]}[]}[],
   past_events_that_may_be_recurring: number[],
   new_dancers_over_time: {key: string, value: number}[],
+  ordered_skill_divisions: number[],
 };
 
 export type Database = {
@@ -69,6 +72,7 @@ export type Database = {
   top_dancers_by_points_gained_recently: {division: number, roles: {role: number, dancers: {points: number, wscdid: number}[]}[]}[],
   past_events_that_may_be_recurring: number[],
   new_dancers_over_time: {key: string, value: number}[],
+  ordered_skill_divisions: number[],
 };
 
 @Injectable({

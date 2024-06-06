@@ -32,6 +32,15 @@ DIVISIONS_MAP = {
 ROLES_MAP_INVERTED = dict((v, k) for k, v in ROLES_MAP.items())
 DIVISIONS_MAP_INVERTED = dict((v, k) for k, v in DIVISIONS_MAP.items())
 
+SKILL_DIVISION_PROGRESSION = [DIVISIONS_MAP_INVERTED[d] for d in [
+  'Newcomer',
+  'Novice',
+  'Intermediate',
+  'Advanced',
+  'All-Stars',
+  'Champions',
+]]
+
 Path(RAW_RESPONSE_DIR).mkdir(parents=True, exist_ok=True)
 
 def get_dancer(wsdc_id: str):
@@ -65,7 +74,7 @@ def get_all_dancers():
           json.dump(res, f)
       current_wsdc_id += 1
 
-get_all_dancers()
+# get_all_dancers()
 
 filenames = next(walk('{}/'.format(RAW_RESPONSE_DIR)), (None, None, []))[2]
 filenames.sort()
@@ -115,6 +124,7 @@ database = {
     "last_updated": datetime.datetime.now().isoformat(),
     'roles': ROLES_MAP,
     'divisions': DIVISIONS_MAP,
+    'ordered_skill_divisions': SKILL_DIVISION_PROGRESSION,
     "dancers": [],
     "events": [],
     'top_dancers_by_points_gained_recently': {},
@@ -173,6 +183,7 @@ for datum in raw_response_dancers:
     res = {
       'id': datum['dancer_wsdcid'],
       'pro': datum["is_pro"] == 1,
+      'primary_role': ROLES_MAP_INVERTED[datum["short_dominate_role"]],
       'first': datum["dancer_first"],
       'last': datum["dancer_last"],
       'placements': leader[0] + follower[0],
