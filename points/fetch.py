@@ -74,7 +74,7 @@ def get_all_dancers():
           json.dump(res, f)
       current_wsdc_id += 1
 
-# get_all_dancers()
+get_all_dancers()
 
 filenames = next(walk('{}/'.format(RAW_RESPONSE_DIR)), (None, None, []))[2]
 filenames.sort()
@@ -180,13 +180,15 @@ for datum in raw_response_dancers:
     leader = placementsToList(datum["leader"]["placements"])
     follower = placementsToList(datum["follower"]["placements"])
     addEarliestPlacement(leader[2], follower[2])
+    dancer_placements = leader[0] + follower[0]
+    dancer_placements.sort(key=lambda p: p["date"], reverse=True)
     res = {
       'id': datum['dancer_wsdcid'],
       'pro': datum["is_pro"] == 1,
       'primary_role': ROLES_MAP_INVERTED[datum["short_dominate_role"]],
       'first': datum["dancer_first"],
       'last': datum["dancer_last"],
-      'placements': leader[0] + follower[0],
+      'placements': dancer_placements,
     }
     if len(res['placements']) > 0:
         database["dancers"].append(res)
