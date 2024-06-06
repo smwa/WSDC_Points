@@ -3,6 +3,12 @@ import { Injectable } from '@angular/core';
 import { decode, decodeAsync } from "@msgpack/msgpack";
 import { map } from 'rxjs';
 
+declare global {
+  interface Window {
+      database: any;
+  }
+}
+
 type IncomingEvent = {
   id: number,
   name: string,
@@ -100,6 +106,8 @@ export class DatabaseFetcherService {
         })),
       })),
     }
+    console.log("Setting window.database, so you can dig into the data");
+    window.database = database;
     return db;
   }));
 
