@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { TemplateOneComponent } from '../template-one/template-one.component';
 import { Database, DatabaseFetcherService } from '../database-fetcher.service';
+import { StateService } from '../state.service';
 
 @Component({
   selector: 'app-events-page',
@@ -20,13 +21,14 @@ export class EventsPageComponent implements OnInit {
   is_loaded = false;
   search = '';
 
-  constructor(private databaseFetcher: DatabaseFetcherService) { }
+  constructor(private databaseFetcher: DatabaseFetcherService, private stateService: StateService) { }
 
   ngOnInit() {
     this.is_loaded = false;
     this.databaseFetcher.database.subscribe((db) => {
       this.database = db;
       setTimeout(() => {
+        this.search = this.stateService.eventsSearchField;
         this.is_loaded = true;
       }, 0)
     });
@@ -47,12 +49,12 @@ export class EventsPageComponent implements OnInit {
         }
       }
       return true;
-    }).slice(0, 1000); // TODO
+    }).slice(0, 1000);
   }
 
   on_search_type(value: string) {
     this.search = value.toLowerCase();
-    console.log(this.search);
+    this.stateService.eventsSearchField = this.search;
   }
 
 }

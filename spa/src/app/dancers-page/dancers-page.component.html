@@ -1,7 +1,7 @@
 <app-template-one [isLoaded]="is_loaded">
   <div class="dancers">
     <h2>Dancers</h2>
-    <input type="text" placeholder="Search" #search (keyup)="on_search_type(search.value)" />
+    <input type="text" placeholder="Search" value="{{search}}" #searchbox (keyup)="on_search_type(searchbox.value)" />
     <div *ngFor="let dancer of get_dancers()">
       <a [routerLink]="'/dancers/' + dancer.id">
         {{ dancer.first }} {{ dancer.last }} ({{ dancer.id }})
