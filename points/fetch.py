@@ -8,7 +8,7 @@ import msgpack
 
 API_URL = "https://points.worldsdc.com/lookup2020/find"
 NONE_SLIDE_LIMIT = 200
-RAW_RESPONSE_DIR = './raw'
+RAW_RESPONSE_FILE = './raw_responses.json'
 LIMIT_TO_DANCE_STYLE = 'West Coast Swing'
 ROLES_MAP = {
     1: 'Leader',
@@ -41,8 +41,6 @@ SKILL_DIVISION_PROGRESSION = [DIVISIONS_MAP_INVERTED[d] for d in [
   'Champions',
 ]]
 
-Path(RAW_RESPONSE_DIR).mkdir(parents=True, exist_ok=True)
-
 def get_dancer(wsdc_id: str):
   r = requests.post(API_URL, data = {'num': wsdc_id})
   if r.status_code != 200:
@@ -54,8 +52,15 @@ def get_dancer(wsdc_id: str):
     return None
   return json
 
+# Load raw responses from a json file
+raw_response_dancers = {} # Keyed by str(wsdc_id)
+try:
+  raw_response_dancers = json.load(open(RAW_RESPONSE_FILE, "r"))
+except:
+  pass
+
 def get_all_dancers():
-    current_wsdc_id = 1
+    current_wsdc_id = 1 # TODO we want to handle this smarter, maybe if they've pointed in the last 5 years then fetch, and also look for new dancers; then once in a blue moon go refresh all
     none_slide = 0
 
     while True:
@@ -70,20 +75,12 @@ def get_all_dancers():
           break
       else:
         none_slide = 0
-        with open("{}/{:05d}.json".format(RAW_RESPONSE_DIR, current_wsdc_id), 'w') as f:
-          json.dump(res, f)
+        raw_response_dancers[str(current_wsdc_id)] = res
       current_wsdc_id += 1
 
 get_all_dancers()
-
-filenames = next(walk('{}/'.format(RAW_RESPONSE_DIR)), (None, None, []))[2]
-filenames.sort()
-
-raw_response_dancers = []
-
-for f in filenames:
-    dancer = json.load(open("{}/{}".format(RAW_RESPONSE_DIR, f), "r"))
-    raw_response_dancers.append(dancer)
+with open(RAW_RESPONSE_FILE, 'w') as f:
+  json.dump(raw_response_dancers, f)
 
 def placementsToList(placements):
     final_placements = []
@@ -176,7 +173,8 @@ def addEarliestPlacement(dateOne: datetime.datetime|None, dateTwo: datetime.date
     new_dancers_by_date[date_string] = 0
   new_dancers_by_date[date_string] += 1
 
-for datum in raw_response_dancers:
+for raw_response_dancer_wsdc_id in raw_response_dancers:
+    datum = raw_response_dancers[raw_response_dancer_wsdc_id]
     leader = placementsToList(datum["leader"]["placements"])
     follower = placementsToList(datum["follower"]["placements"])
     addEarliestPlacement(leader[2], follower[2])
