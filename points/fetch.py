@@ -1,14 +1,13 @@
 import requests
 import json
-from pathlib import Path
-from os import walk
 import json
 import datetime
 import msgpack
+import gzip
 
 API_URL = "https://points.worldsdc.com/lookup2020/find"
 NONE_SLIDE_LIMIT = 200
-RAW_RESPONSE_FILE = './raw_responses.json'
+RAW_RESPONSE_FILE = './raw_responses.json.gz'
 LIMIT_TO_DANCE_STYLE = 'West Coast Swing'
 ROLES_MAP = {
     1: 'Leader',
@@ -55,7 +54,9 @@ def get_dancer(wsdc_id: str):
 # Load raw responses from a json file
 raw_response_dancers = {} # Keyed by str(wsdc_id)
 try:
-  raw_response_dancers = json.load(open(RAW_RESPONSE_FILE, "r"))
+  with open(RAW_RESPONSE_FILE, "rb") as f:
+    raw_response_dancers_json = gzip.decompress(f.read()).decode('utf-8')
+    raw_response_dancers = json.loads(raw_response_dancers_json)
 except:
   pass
 
@@ -79,8 +80,10 @@ def get_all_dancers():
       current_wsdc_id += 1
 
 get_all_dancers()
-with open(RAW_RESPONSE_FILE, 'w') as f:
-  json.dump(raw_response_dancers, f)
+with open(RAW_RESPONSE_FILE, 'wb') as f:
+  raw_response_dancers_json = json.dumps(raw_response_dancers)
+  raw_response_dancers_json_compressed = gzip.compress(bytes(raw_response_dancers_json, 'utf-8'))
+  f.write(raw_response_dancers_json_compressed)
 
 def placementsToList(placements):
     final_placements = []
