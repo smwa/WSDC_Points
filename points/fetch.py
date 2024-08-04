@@ -255,9 +255,9 @@ for kv in new_dancers_over_time:
   kv['key'] = "{:'%y}".format(datetime.date.fromisoformat(kv['key']))
 database['new_dancers_over_time'] = new_dancers_over_time
 
-# Find "rising stars", top 5 for each role/division by points received in the last 6 months
+# Find "rising stars", top 5 for each role/division by points received in the last 3 months
 
-min_date = (datetime.date.today().replace(day=1) - datetime.timedelta(days=180)).replace(day=1) # 6 months ago
+min_date = (datetime.date.today().replace(day=1) - datetime.timedelta(days=90)).replace(day=1) # 3 months ago
 from_each_group = 5
 
 divisions = {} # [novice/beginner/advanced][leader/follower] = {wscid: int, points: int}[]
