@@ -86,7 +86,7 @@ export type Database = {
 })
 export class DatabaseFetcherService {
 
-  database = this.http.get<ArrayBuffer>('assets/database.msgpack', { responseType: 'arraybuffer' as 'json', observe: 'response' }).pipe(map((_database) => {
+  database = this.http.get<ArrayBuffer>('assets/database.txt', { responseType: 'arraybuffer' as 'json', observe: 'response' }).pipe(map((_database) => {
 
     if (_database.body == null) return;
 
