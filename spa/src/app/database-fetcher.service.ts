@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { decode, decodeAsync } from "@msgpack/msgpack";
-import { map } from 'rxjs';
+import { map, Observer, Observable } from 'rxjs';
 
 declare global {
   interface Window {
@@ -85,32 +85,52 @@ export type Database = {
   providedIn: 'root'
 })
 export class DatabaseFetcherService {
+  
+  private fetch_database = () => {
+    return this.http.get<ArrayBuffer>('assets/database.txt', { responseType: 'arraybuffer' as 'json', observe: 'response' }).pipe(map((_database) => {
 
-  database = this.http.get<ArrayBuffer>('assets/database.txt', { responseType: 'arraybuffer' as 'json', observe: 'response' }).pipe(map((_database) => {
+      if (_database.body == null) return;
 
-    if (_database.body == null) return;
-
-    const database = decode(_database.body) as IncomingDatabase;
-    const db: Database = {
-      ...database,
-      last_updated: new Date(database.last_updated),
-      events: database.events.map((old_event) => ({
-        ...old_event,
-        dates: old_event.dates.map(d => new Date(d)),
-      })),
-      dancers: database.dancers.map((old_dancer) => ({
-        ...old_dancer,
-        placements: old_dancer.placements.map(old_placement => ({
-          ...old_placement,
-          date: new Date(old_placement.date),
+      const database = decode(_database.body) as IncomingDatabase;
+      const db: Database = {
+        ...database,
+        last_updated: new Date(database.last_updated),
+        events: database.events.map((old_event) => ({
+          ...old_event,
+          dates: old_event.dates.map(d => new Date(d)),
         })),
-      })),
-    }
-    console.log("Setting window.database, so you can dig into the data");
-    window.database = db;
-    return db;
-  }));
+        dancers: database.dancers.map((old_dancer) => ({
+          ...old_dancer,
+          placements: old_dancer.placements.map(old_placement => ({
+            ...old_placement,
+            date: new Date(old_placement.date),
+          })),
+        })),
+      }
+      console.log("Setting window.database, so you can dig into the data");
+      window.database = db;
+      return db;
+    }));
+  }
 
-  constructor(private http: HttpClient) { }
+  public database: Observable<Database>;
+
+  constructor(private http: HttpClient) {
+    this.database = new Observable<Database>(observer => {
+
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        if(event.data.type == "fetched" && event.data.url.indexOf("database") >= 0) {
+          this.fetch_database().subscribe((db) => {
+            observer.next(db);
+          });
+        }
+      });
+
+      this.fetch_database().subscribe((db) => {
+        observer.next(db);
+      });
+
+    });
+  }
 
 }
