@@ -15,7 +15,7 @@ self.addEventListener('fetch', (event) => {
 
           reloadedAssets[url] = true;
           const client = await self.clients.get(event.clientId);
-          if (client) {
+          if (client && cachedResponse.headers.get('last-modified') !== networkResponse.headers.get('last-modified')) {
             client.postMessage({
               type: "fetched",
               url: url,
