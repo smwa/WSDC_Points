@@ -27,6 +27,7 @@
             "inlineStyleLanguage": "scss",
             "assets": [
               "src/assets",
+              "src/.well-known",
               "src/manifest.json",
               "src/serviceworker.js"
             ],
@@ -97,6 +98,7 @@
             "inlineStyleLanguage": "scss",
             "assets": [
               "src/assets",
+              "src/.well-known",
               "src/manifest.json",
               "src/serviceworker.js"
             ],
