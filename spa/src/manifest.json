@@ -15,12 +15,12 @@
     {
       "src": "/assets/icons/favicon.png",
       "type": "image/png",
-      "sizes": "48x48 96x96 128x128 180x180 192x192 256x256"
+      "sizes": "48x48 96x96 128x128 180x180 192x192 256x256 512x512 1024x1024"
     }
   ],
   "start_url": "/",
   "background_color": "#000000",
-  "display": "fullscreen",
+  "display": "standalone",
   "scope": "/",
   "theme_color": "#062C06",
   "description": "See WSDC points per dancer and various stats."
