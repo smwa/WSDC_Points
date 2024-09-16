@@ -28,6 +28,7 @@
             "assets": [
               "src/assets",
               "src/.well-known",
+              "src/.nojekyll",
               "src/manifest.json",
               "src/serviceworker.js"
             ],
@@ -99,6 +100,7 @@
             "assets": [
               "src/assets",
               "src/.well-known",
+              "src/.nojekyll",
               "src/manifest.json",
               "src/serviceworker.js"
             ],
