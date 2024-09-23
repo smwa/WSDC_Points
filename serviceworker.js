@@ -1,33 +1,26 @@
-const cacheName = 'static_site_cache_v1';
-
-const reloadedAssets = {};
-
 self.addEventListener("install", (event) => {});
 
+
+// Cache strategy: Network, fallback to cache
+// Establish a cache name
+const cacheName = 'static_site_cache_v2';
+
 self.addEventListener('fetch', (event) => {
-  const url = event.request.url;
-  event.respondWith(caches.open(cacheName).then((cache) => {
-    return cache.match(event.request).then((cachedResponse) => {
-      let fetchedResponse = null;
-      if (!cachedResponse || !(url in reloadedAssets)) {
-        fetchedResponse = fetch(event.request).then(async (networkResponse) => {
-          cache.put(event.request, networkResponse.clone());
+  // Check if this is a navigation request
+  if (event.request.mode === 'navigate') {
+    // Open the cache
+    event.respondWith(caches.open(cacheName).then((cache) => {
+      // Go to the network first
+      return fetch(event.request.url).then((fetchedResponse) => {
+        cache.put(event.request, fetchedResponse.clone());
 
-          reloadedAssets[url] = true;
-          const client = await self.clients.get(event.clientId);
-          if (client && cachedResponse.headers.get('last-modified') !== networkResponse.headers.get('last-modified')) {
-            client.postMessage({
-              type: "fetched",
-              url: url,
-            });
-          }
-          
-          return networkResponse;
-        });
-
-      }
-
-      return cachedResponse || fetchedResponse;
-    });
-  }));
+        return fetchedResponse;
+      }).catch(() => {
+        // If the network is unavailable, get
+        return cache.match(event.request.url);
+      });
+    }));
+  } else {
+    return;
+  }
 });
