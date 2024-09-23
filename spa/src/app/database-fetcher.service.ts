@@ -118,13 +118,15 @@ export class DatabaseFetcherService {
   constructor(private http: HttpClient) {
     this.database = new Observable<Database>(observer => {
 
-      navigator.serviceWorker.addEventListener('message', (event) => {
-        if(event.data.type == "fetched" && event.data.url.indexOf("database") >= 0) {
-          this.fetch_database().subscribe((db) => {
-            observer.next(db);
-          });
-        }
-      });
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.addEventListener('message', (event) => {
+          if(event.data.type == "fetched" && event.data.url.indexOf("database") >= 0) {
+            this.fetch_database().subscribe((db) => {
+              observer.next(db);
+            });
+          }
+        });
+      }
 
       this.fetch_database().subscribe((db) => {
         observer.next(db);
