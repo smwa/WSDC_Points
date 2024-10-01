@@ -137,7 +137,7 @@ with open(RAW_RESPONSE_FILE, 'wb') as f:
   raw_response_dancers_json_compressed = gzip.compress(bytes(raw_response_dancers_json, 'utf-8'))
   f.write(raw_response_dancers_json_compressed)
 
-def placementsToList(placements):
+def placementsToList(placements, raw_dancer):
     final_placements = []
     final_events = []
     earliest_event = None
@@ -155,6 +155,10 @@ def placementsToList(placements):
                 competition_date = datetime.datetime.strptime(competition["event"]["date"], '%B %Y')
                 if earliest_event is None or competition_date < earliest_event:
                    earliest_event = competition_date
+                points = competition["points"]
+                if points is None:
+                   print("Found 'None' in points for dancer {}".format(dancer["dancer_wsdcid"]))
+                   points = 0
                 event = {
                     **competition["event"],
                     "date": competition_date.date().isoformat()
@@ -165,7 +169,7 @@ def placementsToList(placements):
                 final_placements.append({
                     "role": role,
                     "result": competition["result"],
-                    "points": competition["points"],
+                    "points": points,
                     "event": event['id'],
                     "date": event["date"],
                     "division": division_name,
@@ -230,8 +234,8 @@ def addEarliestPlacement(dateOne: datetime.datetime|None, dateTwo: datetime.date
 
 for raw_response_dancer_wsdc_id in raw_response_dancers:
     datum = raw_response_dancers[raw_response_dancer_wsdc_id]
-    leader = placementsToList(datum["leader"]["placements"])
-    follower = placementsToList(datum["follower"]["placements"])
+    leader = placementsToList(datum["leader"]["placements"], datum)
+    follower = placementsToList(datum["follower"]["placements"], datum)
     addEarliestPlacement(leader[2], follower[2])
     dancer_placements = leader[0] + follower[0]
     dancer_placements.sort(key=lambda p: p["date"], reverse=True)
