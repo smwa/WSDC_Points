@@ -50,7 +50,6 @@ SKILL_DIVISION_PROGRESSION = [DIVISIONS_MAP_INVERTED[d] for d in [
 number_of_requests_to_wsdc = 0
 
 def get_dancer(wsdc_id: str):
-  number_of_requests_to_wsdc += 1
   r = requests.post(API_URL, data = {'num': wsdc_id})
   if r.status_code != 200:
     print("Bad status code: {}".format(r.status_code))
@@ -80,6 +79,7 @@ def fetch_and_save_dancer(wsdc_id):
     return True
 
 def get_all_dancers(starting_wsdc_id=1):
+    requests_made = 0
     current_wsdc_id = starting_wsdc_id
     none_slide = 0
 
@@ -87,6 +87,7 @@ def get_all_dancers(starting_wsdc_id=1):
       if current_wsdc_id % 500 == 0:
         print("Getting", current_wsdc_id)
       success = fetch_and_save_dancer(current_wsdc_id)
+      requests_made += 1
       if success:
         none_slide = 0
       else:
@@ -95,6 +96,7 @@ def get_all_dancers(starting_wsdc_id=1):
           print("Quitting")
           break
       current_wsdc_id += 1
+    return requests_made
 
 def get_max_placement_date(dancer_role):
   placements = dancer_role['placements']
@@ -116,6 +118,7 @@ def get_max_placement_date(dancer_role):
   return max_placement_date
 
 def get_dancers_abbreviated():
+  requests_made = 0
   max_wsdc_id = 1
   cutoff_date = datetime.datetime.now() - relativedelta(months=COMPETITION_RECENCY_LIMIT_IN_MONTHS)
   for wsdc_id in raw_response_dancers:
@@ -127,12 +130,13 @@ def get_dancers_abbreviated():
       max_date = max_follower_date
     if max_date is not None and max_date > cutoff_date:
       fetch_and_save_dancer(dancer['dancer_wsdcid'])
-  get_all_dancers(max_wsdc_id + 1)
+      requests_made += 1
+  return requests_made + get_all_dancers(max_wsdc_id + 1)
 
 if FULL_DANCER_CHECK:
-  get_all_dancers(1)
+  number_of_requests_to_wsdc = get_all_dancers(1)
 else:
-  get_dancers_abbreviated()
+  number_of_requests_to_wsdc = get_dancers_abbreviated()
 
 print("Made {} requests to WSDC".format(number_of_requests_to_wsdc))
 
