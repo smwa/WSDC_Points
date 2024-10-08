@@ -47,7 +47,10 @@ SKILL_DIVISION_PROGRESSION = [DIVISIONS_MAP_INVERTED[d] for d in [
   'Champions',
 ]]
 
+number_of_requests_to_wsdc = 0
+
 def get_dancer(wsdc_id: str):
+  number_of_requests_to_wsdc += 1
   r = requests.post(API_URL, data = {'num': wsdc_id})
   if r.status_code != 200:
     print("Bad status code: {}".format(r.status_code))
@@ -130,6 +133,8 @@ if FULL_DANCER_CHECK:
   get_all_dancers(1)
 else:
   get_dancers_abbreviated()
+
+print("Made {} requests to WSDC".format(number_of_requests_to_wsdc))
 
 raw_response_dancers = dict(sorted(raw_response_dancers.items()))
 with open(RAW_RESPONSE_FILE, 'wb') as f:
