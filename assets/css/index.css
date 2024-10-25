@@ -123,3 +123,11 @@ a.main-nav-button {
     flex: 1;
 }
 /* End Events Page */
+
+.spinner {
+    background-image: url("../img/spinner.gif");
+    background-size: contain;
+    width: 3rem;
+    height: 3rem;
+    margin: auto;
+}

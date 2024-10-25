@@ -1,0 +1,132 @@
+---
+permalink: /division-progression
+layout: default
+background_image: swingout.jpg
+previous_page: /dancers-over-time
+next_page: /about
+---
+
+<h3>Days To Progress From Division</h3>
+<div class="spinner"></div>
+<canvas id="dp"></canvas>
+
+<script src="lib/chartjs/dist/chart.umd.js"></script>
+<script src="lib/chartjs-chart-boxplot/build/index.umd.min.js"></script>
+<script>
+  const main = async () => {
+    const db = await getDatabase();
+    const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
+
+    const divisions_plus_top = db.ordered_skill_divisions;
+    const data_all_by_key = {};
+
+    db.dancers.forEach(dancer => {
+      const earliest_date_by_division = {};
+
+      dancer.placements
+        .filter(p => p.role === dancer.primary_role)
+        .forEach(placement => {
+          const placement_date = new Date(placement.date);
+          if (!(placement.division in earliest_date_by_division)) {
+            earliest_date_by_division[placement.division] = placement_date;
+          }
+          else {
+            if (placement_date < earliest_date_by_division[placement.division]) {
+              earliest_date_by_division[placement.division] = placement_date;
+            }
+          }
+        });
+
+        for (let i = 1; i < divisions_plus_top.length; i++) {
+          const from_division = divisions_plus_top[i-1];
+          const to_division = divisions_plus_top[i];
+          if (!(from_division in earliest_date_by_division) || !(to_division in earliest_date_by_division)) {
+            continue;
+          }
+          const from_division_date = earliest_date_by_division[from_division];
+          const to_division_date = earliest_date_by_division[to_division];
+          const days = Math.round(Math.abs((to_division_date.getTime() - from_division_date.getTime()) / ONE_DAY_IN_MS))
+          if (!(from_division in data_all_by_key)) {
+            data_all_by_key[from_division] = [];
+          }
+          data_all_by_key[from_division].push(days);
+        }
+
+    });
+
+
+    const data_all = [];
+    const labels = [];
+
+    for (let i = 1; i < divisions_plus_top.length; i++) {
+      const from_division = divisions_plus_top[i-1];
+      const to_division = divisions_plus_top[i];
+      labels.push(db.divisions[from_division]);
+      data_all.push(data_all_by_key[from_division]);
+    }
+
+    const options = {
+      meanRadius: 0,
+      medianColor: '',
+      lowerBackgroundColor: '',
+      backgroundColor: '',
+      borderColor: '',
+      borderWidth: 0,
+      outlierStyle: 'circle',
+      outlierRadius: 2,
+      outlierBackgroundColor: '#CCCCCC',
+      outlierBorderColor: '',
+      outlierBorderWidth: 0,
+      itemStyle: 'line',
+      itemRadius: 0,
+      itemBackgroundColor: '',
+      itemBorderColor: '',
+      itemBorderWidth: 0,
+      hitPadding: 0,
+      outlierHitRadius: 0,
+      meanStyle: 'line',
+      meanBackgroundColor: '',
+      meanBorderColor: '',
+      meanBorderWidth: 0,
+      scales: {
+        x: {
+          ticks: {
+            color: 'white',
+          }
+        },
+        y: {
+          ticks: {
+            color: 'white',
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          labels: {
+            color: "#000000",
+          },
+        },
+      },
+    }
+
+    this.chart = new ChartBoxPlot.BoxPlotChart("dp", {      
+
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            minStats: 'min',
+            maxStats: 'whiskerMax',
+            label: "All",
+            data: data_all,
+          }, 
+        ]
+      },
+
+      options: options,
+      
+    });
+    document.querySelector(".spinner").remove();
+  }
+  main();
+</script>

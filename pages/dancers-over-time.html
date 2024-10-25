@@ -3,4 +3,77 @@ permalink: /dancers-over-time
 layout: default
 background_image: dip.jpg
 previous_page: /dancers-on-the-rise
+next_page: /division-progression
 ---
+
+<canvas id="dot"></canvas>
+
+<script src="lib/chartjs/dist/chart.umd.js"></script>
+<script>
+  new Chart(
+    document.getElementById('dot'),
+    {
+      type: 'line',
+
+      data: {
+        labels: [
+          {% for dot in site.data.database.new_dancers_over_time %}
+            "{{ dot.key }}",
+          {% endfor %}
+        ],
+	      datasets: [
+          {
+            label: "New Dancers With Points",
+            data: [
+              {% for dot in site.data.database.new_dancers_over_time %}
+                {{ dot.value }},
+              {% endfor %}
+            ],
+            backgroundColor: 'black'
+          },
+        ]
+      },
+      options: {
+        datasets: {
+          line: {
+            pointStyle: 'circle',
+            radius: 5,
+          },
+        },
+        elements: {
+          line: {
+            borderColor: 'white',
+            backgroundColor: 'white',
+          },
+          point: {
+            backgroundColor: 'white',
+            borderColor: 'white',
+          },
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: 'white',
+            }
+          },
+          y: {
+            ticks: {
+              color: 'white',
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            labels: {
+              font: {
+                size: 18,
+              },
+              color: "#FFFFFF",
+            },
+          },
+        },
+      },
+      
+    }
+  );
+</script>
