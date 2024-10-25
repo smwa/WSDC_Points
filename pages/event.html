@@ -1,0 +1,36 @@
+---
+permalink: /event
+layout: javascripted
+background_image: swingfling.jpg
+previous_page: /events
+---
+
+<h2 id="data-event-name"></h2>
+<a target="_blank" href="#" id="data-event-url"></a>
+<div id="data-event-location"></div>
+
+<div>
+  <div>Dates Hosted:</div>
+  <ul id="data-event-dates"></ul>
+</div>
+
+<script>
+  const main = async () => {
+    const db = await getDatabase();
+    const event_id = parseInt(window.location.hash.substring(1), 10);
+    const event = db.events.find((e) => e.id === event_id);
+    console.log(event);
+    document.getElementById("data-event-name").innerText = event.name;
+    document.getElementById("data-event-location").innerText = event.location;
+    const urlElement = document.getElementById("data-event-url");
+    urlElement.href = event.url;
+    urlElement.innerText = event.url;
+    const datesElement = document.getElementById("data-event-dates");
+    let dateHtml = "";
+    event.dates.forEach((date) => {
+      dateHtml += `<li>${(new Date(date)).toLocaleDateString('en-US', {month: 'long', year: 'numeric'})}</li>`;
+    });
+    datesElement.innerHTML = dateHtml;
+  };
+  main();
+</script>

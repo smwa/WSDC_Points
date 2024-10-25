@@ -130,18 +130,19 @@ input.search {
     border-radius: 4px;
 }
 
-div#listcontainer > ul.list {
+ul {
     list-style-type: none;
     padding: 0;
+    margin: 0;
 }
 
-div#listcontainer > ul.list > * {
+ul > * {
     font-size: 28px;
     padding-top: 0.9rem;
     padding-bottom: 0.2rem;
     border-bottom: 1px solid #dddddd;
 }
 
-div#listcontainer > ul.list > * a {
+ul > * a {
     text-decoration: none;
 }
