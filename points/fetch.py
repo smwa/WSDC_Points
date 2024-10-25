@@ -191,7 +191,9 @@ database = {
     'divisions': DIVISIONS_MAP,
     'ordered_skill_divisions': SKILL_DIVISION_PROGRESSION,
     "dancers": [],
+    "dancers_count": 0,
     "events": [],
+    "events_count": 0,
     'top_dancers_by_points_gained_recently': {},
     'past_events_that_may_be_recurring': [],
     'new_dancers_over_time': [],
@@ -332,7 +334,14 @@ for event in database['events']:
   if len(valid_dates) > 0:
     database["past_events_that_may_be_recurring"].append(event['id'])
 
+database["dancers_count"] = len(database["dancers"])
+database["events_count"] = len(database["events"])
+
 # Write to file, leave at bottom of this script
-with open("../spa/src/assets/database.txt", 'bw') as f:
+with open("../assets/database.txt", 'bw') as f:
     contents = msgpack.packb(database)
     f.write(contents)
+
+# Write to json for jekyll, leave at bottom of this script
+with open("../_data/database.json", 'w') as f:
+    json.dump(database, f)

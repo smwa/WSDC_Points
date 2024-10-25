@@ -1,0 +1,97 @@
+---
+permalink: /dancer
+layout: javascripted
+background_image: swing_feet.jpg
+previous_page: /dancers
+---
+
+<h2><span id="data-dancer-first"></span> <span id="data-dancer-last"></span> (<span id="data-dancer-id"></span>)</h2>
+
+
+<table id="data-dancer-by-division"></table>
+
+<div id="data-dancer-placements" class="placements"></div>
+
+
+<script>
+
+
+  const getPointsByDivision = (db, dancer) => {
+    const byDivision = [];
+
+    dancer.placements.forEach((placement) => {
+      const division = db.divisions[placement.division];
+      const role = db.roles[placement.role];
+      const points = placement.points;
+      let added = false;
+      byDivision.forEach((byDivisionItem) => {
+        if (byDivisionItem.division === division && byDivisionItem.role === role) {
+          byDivisionItem.points += points;
+          added = true;
+        }
+      });
+      if (!added) {
+        byDivision.push({
+          division: division || 'Unknown',
+          role: role || 'Unknown',
+          points: points,
+        });
+      }
+    });
+
+    return byDivision;
+  };
+
+  const format_placement_result = (placement) => {
+    if (placement === '11') return '11th';
+    if (placement === '12') return '12th';
+    if (placement === '13') return '13th';
+    if (placement.substring(-1) === '1') return `${placement}st`;
+    if (placement.substring(-1) === '2') return `${placement}nd`;
+    if (placement.substring(-1) === '3') return `${placement}rd`;
+    if (parseInt(placement, 10) > 1) return `${placement}th`;
+    return placement;
+  };
+
+  const main = async () => {
+    const db = await getDatabase();
+    const dancer_id = parseInt(window.location.hash.substring(1), 10);
+    const dancer = db.dancers.find((e) => e.id === dancer_id);
+    
+    document.getElementById("data-dancer-first").innerText = dancer.first;
+    document.getElementById("data-dancer-last").innerText = dancer.last;
+    document.getElementById("data-dancer-id").innerText = dancer.id;
+    
+    let byDivisionHtml = "<tr><th>Points</th><th>Division</th><th>Role</th></tr>";
+    getPointsByDivision(db, dancer).forEach((byDivision) => {
+      byDivisionHtml += `<tr><td>${byDivision.points}</td><td>${byDivision.division}</td><td>${byDivision.role}</td></tr>`;
+    });
+    document.getElementById("data-dancer-by-division").innerHTML = byDivisionHtml;
+
+    let placementsHtml = "";
+    dancer.placements.forEach(placement => {
+      placementsHtml += "<div>";
+
+      placementsHtml += "<div>";
+      placementsHtml += (new Date(placement.date)).toLocaleDateString('en-US', {month: 'long', day: 'numeric', year: 'numeric'});
+      placementsHtml += "</div>";
+
+      placementsHtml += `<a href="/event#${placement.event}">`;
+      placementsHtml += db.events.find((e) => e.id === placement.event).name;
+      placementsHtml += "</a>";
+      
+      placementsHtml += "<div>";
+      placementsHtml += `${db.divisions[placement.division]} ${db.roles[placement.role]}`;
+      placementsHtml += "</div>";  
+        
+      placementsHtml += "<div>";
+      placementsHtml += `Placed ${format_placement_result(placement.result)} for ${placement.points} points`;
+      placementsHtml += "</div>";
+
+      placementsHtml += "</div>";
+    });
+    document.getElementById("data-dancer-placements").innerHTML = placementsHtml;
+
+  };
+  main();
+</script>

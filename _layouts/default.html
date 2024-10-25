@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>WSDC Points</title>
+  <meta name="description" content="WSDC Points lets you lookup various information about dancers and events that participate within WSDC. This includes how many points a dancer has and which competitions they earned those points. You can also learn which events have happened in the past and what years they were held. We've included statistics to show how long it takes dancers to rise through the competition levels and what dancers have been rising through the levels the fastest.">
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="assets/icons/favicon.png">
+  <meta name="theme-color" content="#062C06">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="assets/css/index.css">
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://wsdc.mechstack.dev/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="WSDC Points">
+  <meta property="og:description" content="See West Coast Swing WSDC points for various dancers and see past official events.">
+  <meta property="og:image" content="https://wsdc.mechstack.dev/assets/img/swing_feet.jpg">
+  <meta name="twitter:image" content="https://wsdc.mechstack.dev/assets/img/swing_feet.jpg">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="wsdc.mechstack.dev">
+  <meta property="twitter:url" content="https://wsdc.mechstack.dev/">
+  <meta name="twitter:title" content="WSDC Points">
+  <meta name="twitter:description" content="See West Coast Swing WSDC points for various dancers and see past official events.">
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+</head>
+<body style='background-image: url("assets/img/{{ page.background_image }}");'>
+
+  {% if page.previous_page %}
+  <a class="previous main-nav-button" href="{{ page.previous_page }}">&lt;</a>
+  {% endif %}
+  {% if page.next_page %}
+  <a class="next main-nav-button" href="{{ page.next_page }}">&gt;</a>
+  {% endif %}
+
+  <div class="pushdown"></div>
+  <div class="body-container">
+    {{ content }}
+  </div>
+
+
+  <script>
+    {% if jekyll.environment != "development" %}
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register("{{ 'service-worker.js' | relative_url }}");
+      }
+    {% endif %}
+  </script>
+
+  <!-- Matomo -->
+  <script>
+    var _paq = window._paq = window._paq || [];
+    /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+    _paq.push(['trackPageView']);
+    _paq.push(['enableLinkTracking']);
+    (function() {
+      var u="//mat.mechstack.dev/";
+      _paq.push(['setTrackerUrl', u+'matomo.php']);
+      _paq.push(['setSiteId', '7']);
+      var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+      g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+    })();
+  </script>
+  <!-- End Matomo Code -->
+
+</body>
+</html>

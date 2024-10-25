@@ -1,0 +1,40 @@
+---
+permalink: /dancers-on-the-rise
+layout: default
+background_image: wcsroom.jpg
+previous_page: /upcoming-events
+next_page: /dancers-over-time
+---
+
+<h2>Dancers On The Rise</h2>
+
+{% for division in site.data.database.top_dancers_by_points_gained_recently %}
+  {% assign division_id = division.division | append: "" %}
+  <div class="division">
+
+    <h3>{{ site.data.database.divisions[division_id] }}</h3>
+    <div class="roles">
+      {% for role in division.roles %}
+      {% assign role_id = role.role | append: "" %}
+      <div class="role">
+        <h5>{{ site.data.database.roles[role_id] }}</h5>
+
+        <div class="dancers">
+          {% for dancer in role.dancers %}
+          {% assign full_dancer = site.data.database.dancers | find: "id", dancer.wscdid %}
+          <div class="dancer">
+            <h6>
+              <a href="/dancer#{{full_dancer.id}}">
+                {{ full_dancer.first }} {{ full_dancer.last }}
+              </a>
+            </h6>
+          </div>
+          {% endfor %}
+        </div>
+
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+{% endfor %}
