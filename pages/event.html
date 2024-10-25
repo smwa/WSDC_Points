@@ -19,7 +19,7 @@ previous_page: /events
     const db = await getDatabase();
     const event_id = parseInt(window.location.hash.substring(1), 10);
     const event = db.events.find((e) => e.id === event_id);
-    console.log(event);
+
     document.getElementById("data-event-name").innerText = event.name;
     document.getElementById("data-event-location").innerText = event.location;
     const urlElement = document.getElementById("data-event-url");

@@ -146,3 +146,18 @@ ul > * {
 ul > * a {
     text-decoration: none;
 }
+
+td {
+    text-align: center;
+}
+
+.placements {
+    display: flex;
+    flex-direction: column;
+}
+
+.placements > * {
+    border-bottom: 1px solid white;
+    padding-bottom: 1rem;
+    padding-top: 1rem;
+}
