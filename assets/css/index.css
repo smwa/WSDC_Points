@@ -34,7 +34,7 @@ body {
     margin-right: auto;
     padding: .2rem 1rem;
     overflow-wrap: break-word;
-    max-width: 100%;
+    max-width: calc(100vw - 2rem);
     width: 24rem;
     min-height: 20rem;
     border-radius: 10px 10px 0 0;
