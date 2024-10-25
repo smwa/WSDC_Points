@@ -1,0 +1,21 @@
+---
+permalink: /upcoming-events
+layout: default
+background_image: swingfling.jpg
+previous_page: /
+---
+
+<div>Upcoming events, based on last year</div>
+
+{% for event_id in site.data.database.past_events_that_may_be_recurring %}
+  {% assign event = site.data.database.events | find: "id", event_id %}
+    <div class="event-item">
+      <h4>
+        <a href="/event#{{ event.id }}">{{ event.name }}</a>
+      </h4>
+      <div>
+        <a target="_blank" href="{{ event.url }}">{{ event.url }}</a>
+      </div>
+      <div>{{ event.location }}</div>
+    </div>
+{% endfor %}

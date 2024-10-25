@@ -1,0 +1,14 @@
+---
+permalink: /
+layout: default
+background_image: swing_feet.jpg
+next_page: "/upcoming-events"
+---
+
+<span>Updated {{ site.data.database.last_updated | date_to_long_string: "ordinal", "US" }}</span>
+
+<a href="/dancers">{{ site.data.database.dancers_count }} Dancers</a>
+
+<a href="/events">{{ site.data.database.events_count }} Events</a>
+
+<a href="/about/us">About Us</a>

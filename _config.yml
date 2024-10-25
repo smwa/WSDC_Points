@@ -1,0 +1,23 @@
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "https://wsdc.mechstack.dev" # the base hostname & protocol for your site, e.g. http://example.com
+
+defaults:
+  - scope:
+      path: "assets"
+    values:
+      asset: true
+  - scope:
+      path: "lib"
+    values:
+      asset: true
+
+exclude:
+  - .bundle/
+  - .jekyll-cache/
+  - vendor/
+  - .gitignore
+  - Gemfile
+  - Gemfile.lock
+  - run.sh
+  - points/
+  - spa/
