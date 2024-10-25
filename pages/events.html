@@ -1,0 +1,45 @@
+---
+permalink: /events
+layout: javascripted
+background_image: lindy.jpg
+previous_page: /dancers
+next_page: /
+---
+
+<h3>Events</h3>
+
+<script src="lib/list.min.js"></script>
+
+<div id="listcontainer">
+
+  <input type="search" class="search" placeholder="Search" autofocus="autofocus" />
+
+  <ul class="list"></ul>
+
+</div>
+
+<script>
+  const main = async () => {
+    const db = await getDatabase();
+
+    const options = {
+      searchDelay: 150,
+      page: 100,
+      indexAsync: true,
+      searchColumns: [
+        "id",
+        "name",
+        "location",
+      ],
+      valueNames: [
+        "id",
+        "name",
+        "location",
+      ],
+      item: (event) => `<li><a href="/event#${event.id}">${event.name} <small>${event.location}</small></a></li>`,
+    };
+
+    const userList = new List('listcontainer', options, db.events);
+  };
+  main();
+</script>

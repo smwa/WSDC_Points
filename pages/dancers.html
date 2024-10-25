@@ -1,0 +1,45 @@
+---
+permalink: /dancers
+layout: javascripted
+background_image: swingdanceuk.jpg
+previous_page: /about
+next_page: /events
+---
+
+<h3>Dancers</h3>
+
+<script src="lib/list.min.js"></script>
+
+<div id="listcontainer">
+
+  <input type="search" class="search" placeholder="Search" autofocus="autofocus" />
+
+  <ul class="list"></ul>
+
+</div>
+
+<script>
+  const main = async () => {
+    const db = await getDatabase();
+
+    const options = {
+      searchDelay: 150,
+      page: 100,
+      indexAsync: true,
+      searchColumns: [
+        "id",
+        "first",
+        "last",
+      ],
+      valueNames: [
+        "id",
+        "first",
+        "last",
+      ],
+      item: (dancer) => `<li><a href="/dancer#${dancer.id}">${dancer.first} ${dancer.last} <small>(${dancer.id})</small></a></li>`,
+    };
+
+    const userList = new List('listcontainer', options, db.dancers);
+  };
+  main();
+</script>

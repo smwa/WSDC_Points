@@ -29,15 +29,6 @@ body {
     position: relative;
 }
 
-@keyframes slideInFromBottom {
-    0% {
-        transform: translateY(100%);
-    }
-    100% {
-        transform: translateY(0);
-    }
-}
-
 .body-container {
     margin-left: auto;
     margin-right: auto;
@@ -48,11 +39,9 @@ body {
     min-height: 20rem;
     border-radius: 10px 10px 0 0;
     margin-bottom: calc(100lvh - 100svh);
-    animation: 1200ms ease-out 0s 1 slideInFromBottom;
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    justify-content: center;
     background-color: rgba(0, 0, 0, 0.7);
 }
 
@@ -130,4 +119,29 @@ a.main-nav-button {
     width: 3rem;
     height: 3rem;
     margin: auto;
+}
+
+input.search {
+    width: 100%;
+    font-size: 18px;
+    background-color: #dddddd;
+    border: 0;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+div#listcontainer > ul.list {
+    list-style-type: none;
+    padding: 0;
+}
+
+div#listcontainer > ul.list > * {
+    font-size: 28px;
+    padding-top: 0.9rem;
+    padding-bottom: 0.2rem;
+    border-bottom: 1px solid #dddddd;
+}
+
+div#listcontainer > ul.list > * a {
+    text-decoration: none;
 }
