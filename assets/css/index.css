@@ -29,12 +29,6 @@ body {
     position: relative;
 }
 
-.event-item {
-    padding: 0 0 1rem 0;
-    flex: 0;
-    border-bottom: 1px solid #aaaaaa;
-}
-
 @keyframes slideInFromBottom {
     0% {
         transform: translateY(100%);
@@ -60,6 +54,11 @@ body {
     gap: 1rem;
     justify-content: center;
     background-color: rgba(0, 0, 0, 0.7);
+}
+
+h6, h5, h4, h3, h2, h1 {
+    margin: 0;
+    color: #FFFFFF;
 }
 
 a {
@@ -98,3 +97,29 @@ a.main-nav-button {
 .main-nav-button.next {
     right: 1rem;
 }
+
+/* Upcoming Events Page */
+.event-item {
+    padding: 0 0 1rem 0;
+    flex: 0;
+    border-bottom: 1px solid #aaaaaa;
+}
+/* End Upcoming Events Page */
+
+/* Events Page */
+.division {
+    padding: 1rem 0 1rem 0;
+    flex: 0;
+    border-bottom: 1px solid #aaaaaa;
+}
+
+.roles {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+}
+
+.role {
+    flex: 1;
+}
+/* End Events Page */
