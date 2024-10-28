@@ -161,3 +161,12 @@ td {
     padding-bottom: 1rem;
     padding-top: 1rem;
 }
+
+.flex-centered-column-gapped {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 auto;
+}
