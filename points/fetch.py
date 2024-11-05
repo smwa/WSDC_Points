@@ -10,6 +10,9 @@ from os import environ
 FULL_DANCER_CHECK = False
 if "FULLDANCERCHECK" in environ:
   FULL_DANCER_CHECK = True
+SKIP_FETCH = False
+if "SKIPFETCH" in environ:
+  SKIP_FETCH = True
 COMPETITION_RECENCY_LIMIT_IN_MONTHS = 36
 
 API_URL = "https://points.worldsdc.com/lookup2020/find"
@@ -133,10 +136,11 @@ def get_dancers_abbreviated():
       requests_made += 1
   return requests_made + get_all_dancers(max_wsdc_id + 1)
 
-if FULL_DANCER_CHECK:
-  number_of_requests_to_wsdc = get_all_dancers(1)
-else:
-  number_of_requests_to_wsdc = get_dancers_abbreviated()
+if not SKIP_FETCH:
+  if FULL_DANCER_CHECK:
+    number_of_requests_to_wsdc = get_all_dancers(1)
+  else:
+    number_of_requests_to_wsdc = get_dancers_abbreviated()
 
 print("Made {} requests to WSDC".format(number_of_requests_to_wsdc))
 
@@ -199,8 +203,6 @@ database = {
     'new_dancers_over_time': [],
 }
 
-events = []
-
 def addEvents(_events, new_events):
   for new_event in new_events:
     event = None
@@ -219,7 +221,7 @@ def addEvents(_events, new_events):
         _events.append(event)
     event['dates'].append(new_event['date'])
     event['dates'] = list(set(event['dates']))
-    event['dates'].sort()
+    event['dates'].sort(reverse=True)
     if event['dates'][-1] == new_event['date']:
         # This is the most recent, so update info
         event["name"] = new_event['name']
@@ -252,16 +254,17 @@ for raw_response_dancer_wsdc_id in raw_response_dancers:
     dancer_placements.sort(key=lambda p: p["date"], reverse=True)
     res = {
       'id': datum['dancer_wsdcid'],
-      'pro': datum["is_pro"] == 1,
+      # 'pro': datum["is_pro"] == 1,
       'primary_role': ROLES_MAP_INVERTED[datum["short_dominate_role"]],
-      'first': datum["dancer_first"],
-      'last': datum["dancer_last"],
+      'name': "{} {}".format(datum["dancer_first"], datum["dancer_last"]),
       'placements': dancer_placements,
     }
     if len(res['placements']) > 0:
         database["dancers"].append(res)
         database["events"] = addEvents(database["events"], leader[1])
         database["events"] = addEvents(database["events"], follower[1])
+
+database["events"].sort(key=lambda kv: kv["id"], reverse=True)
 
 # Get how many new dancers by month
 new_dancers_over_time = [{'key': k, 'value': new_dancers_by_date[k]} for k in new_dancers_by_date.keys()]
@@ -291,6 +294,8 @@ for dancer in database["dancers"]:
         if dancer['id'] not in divisions[_division][_role]:
             divisions[_division][_role][dancer['id']] = 0
         divisions[_division][_role][dancer['id']] += _points
+
+database["dancers"].sort(key=lambda kv: kv["id"], reverse=True)
 
 sorted_divisions = {}
 for division in divisions:
@@ -340,6 +345,11 @@ database["events_count"] = len(database["events"])
 # Write to file, leave at bottom of this script
 with open("../assets/database.txt", 'bw') as f:
     contents = msgpack.packb(database)
+    f.write(contents)
+
+# Write only events to file, leave at bottom of this script
+with open("../assets/events.txt", 'bw') as f:
+    contents = msgpack.packb({ "events": database["events"] })
     f.write(contents)
 
 # Write to json for jekyll, leave at bottom of this script

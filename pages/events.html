@@ -1,6 +1,6 @@
 ---
 permalink: /events
-layout: javascripted
+layout: default
 background_image: lindy.jpg
 previous_page: /dancers
 next_page: /
@@ -20,11 +20,18 @@ next_page: /
 
 <script>
   const main = async () => {
-    const db = await getDatabase();
+    const events = [
+{% for event in site.data.database.events %}
+{
+id: {{event.id}},
+name: "{{event.name | smartify | normalize_whitespace }}",
+location: "{{event.location | smartify | normalize_whitespace }}"
+},
+{% endfor %}
+    ];
 
     const options = {
-      searchDelay: 150,
-      page: 100,
+      page: 1000,
       indexAsync: true,
       searchColumns: [
         "id",
@@ -39,7 +46,7 @@ next_page: /
       item: (event) => `<li><a href="/event#${event.id}">${event.name} <small>${event.location}</small></a></li>`,
     };
 
-    const userList = new List('listcontainer', options, db.events);
+    const userList = new List('listcontainer', options, events);
   };
   main();
 </script>

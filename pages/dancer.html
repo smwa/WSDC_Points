@@ -5,7 +5,7 @@ background_image: swing_feet.jpg
 previous_page: /dancers
 ---
 
-<h2><span id="data-dancer-first"></span> <span id="data-dancer-last"></span> (<span id="data-dancer-id"></span>)</h2>
+<h2><span id="data-dancer-name"></span> (<span id="data-dancer-id"></span>)</h2>
 
 
 <table id="data-dancer-by-division"></table>
@@ -58,8 +58,7 @@ previous_page: /dancers
     const dancer_id = parseInt(window.location.hash.substring(1), 10);
     const dancer = db.dancers.find((e) => e.id === dancer_id);
     
-    document.getElementById("data-dancer-first").innerText = dancer.first;
-    document.getElementById("data-dancer-last").innerText = dancer.last;
+    document.getElementById("data-dancer-name").innerText = dancer.name;
     document.getElementById("data-dancer-id").innerText = dancer.id;
     
     let byDivisionHtml = "<tr><th>Points</th><th>Division</th><th>Role</th></tr>";

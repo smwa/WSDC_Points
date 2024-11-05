@@ -16,7 +16,7 @@ previous_page: /events
 
 <script>
   const main = async () => {
-    const db = await getDatabase();
+    const db = await getEventsDatabase();
     const event_id = parseInt(window.location.hash.substring(1), 10);
     const event = db.events.find((e) => e.id === event_id);
 

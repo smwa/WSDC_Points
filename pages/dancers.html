@@ -28,15 +28,13 @@ next_page: /events
       indexAsync: true,
       searchColumns: [
         "id",
-        "first",
-        "last",
+        "name",
       ],
       valueNames: [
         "id",
-        "first",
-        "last",
+        "name",
       ],
-      item: (dancer) => `<li><a href="/dancer#${dancer.id}">${dancer.first} ${dancer.last} <small>(${dancer.id})</small></a></li>`,
+      item: (dancer) => `<li><a href="/dancer#${dancer.id}">${dancer.name} <small>(${dancer.id})</small></a></li>`,
     };
 
     const userList = new List('listcontainer', options, db.dancers);
