@@ -1,6 +1,6 @@
 ---
 permalink: /dancers
-layout: javascripted
+layout: default
 background_image: swingdanceuk.jpg
 previous_page: /about
 next_page: /events
@@ -20,10 +20,13 @@ next_page: /events
 
 <script>
   const main = async () => {
-    const db = await getDatabase();
+    const dancers = [
+{% for dancer in site.data.database.dancers %}
+{id:{{dancer.id}},name:"{{dancer.name | smartify | normalize_whitespace }}"},
+{% endfor %}
+    ];
 
     const options = {
-      searchDelay: 150,
       page: 100,
       indexAsync: true,
       searchColumns: [
@@ -37,7 +40,7 @@ next_page: /events
       item: (dancer) => `<li><a href="/dancer#${dancer.id}">${dancer.name} <small>(${dancer.id})</small></a></li>`,
     };
 
-    const userList = new List('listcontainer', options, db.dancers);
+    const userList = new List('listcontainer', options, dancers);
   };
   main();
 </script>
