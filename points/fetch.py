@@ -1,6 +1,7 @@
 import requests
+from bs4 import BeautifulSoup
 import json
-import json
+import re
 import datetime
 from dateutil.relativedelta import relativedelta
 import msgpack
@@ -18,6 +19,7 @@ COMPETITION_RECENCY_LIMIT_IN_MONTHS = 36
 API_URL = "https://points.worldsdc.com/lookup2020/find"
 NONE_SLIDE_LIMIT = 200
 RAW_RESPONSE_FILE = './raw_responses.json.gz'
+RAW_EVENTS_RESPONSE_FILE = './raw_events.html.gz'
 LIMIT_TO_DANCE_STYLE = 'West Coast Swing'
 ROLES_MAP = {
     1: 'Leader',
@@ -65,12 +67,9 @@ def get_dancer(wsdc_id: str):
 
 # Load raw responses from a json file
 raw_response_dancers = {} # Keyed by str(wsdc_id)
-try:
-  with open(RAW_RESPONSE_FILE, "rb") as f:
-    raw_response_dancers_json = gzip.decompress(f.read()).decode('utf-8')
-    raw_response_dancers = json.loads(raw_response_dancers_json)
-except:
-  pass
+with open(RAW_RESPONSE_FILE, "rb") as f:
+  raw_response_dancers_json = gzip.decompress(f.read()).decode('utf-8')
+  raw_response_dancers = json.loads(raw_response_dancers_json)
 
 def fetch_and_save_dancer(wsdc_id):
   res = get_dancer("{}".format(wsdc_id))
@@ -136,11 +135,64 @@ def get_dancers_abbreviated():
       requests_made += 1
   return requests_made + get_all_dancers(max_wsdc_id + 1)
 
+def parseEventsFromWsdcEventsPageHtml(html):
+  soup = BeautifulSoup(html, 'html.parser')
+  rows = soup.find("table").find_all("tr")[1:]
+  ret = []
+  for row in rows:
+    tds = row.find_all('td')
+    date = tds[0].get_text()
+    location = tds[2].get_text()
+    name = tds[1].find("div", class_="event_name").get_text()
+    url = tds[1].find("a")['href']
+    event_type = tds[1].find("div", class_="event_type").get_text()
+
+    start_date = None
+    end_date = None
+
+    try:
+      year = re.findall('\d{4}', date)[0]
+      month = re.findall('[a-zA-Z]{3}', date)[0]
+      day = re.findall('\d{1,2}', date)[0]
+      month = datetime.datetime.strptime(month, '%b').month
+      start_date = datetime.datetime(int(year), month, int(day)).isoformat()
+
+      year = re.findall('\d{4}', date)[-1]
+      month = re.findall('[a-zA-Z]{3}', date)[-1]
+      day = re.findall('\s(\d{1,2})[,\s]', date)[-1]
+      month = datetime.datetime.strptime(month, '%b').month
+      end_date = datetime.datetime(int(year), month, int(day)).isoformat()
+    except Exception as e:
+      raise e
+      print("Failed with date {}".format(date))
+      continue
+    ret.append({
+      "name": name,
+      "location": location,
+      "url": url,
+      "type": event_type,
+      "end_date": end_date,
+      "start_date": start_date
+    })
+  return ret
+
+eventsFromWsdc = []
+
 if not SKIP_FETCH:
   if FULL_DANCER_CHECK:
     number_of_requests_to_wsdc = get_all_dancers(1)
   else:
     number_of_requests_to_wsdc = get_dancers_abbreviated()
+  eventsPageResponse = requests.get("https://www.worldsdc.com/events/")
+  number_of_requests_to_wsdc += 1
+  if eventsPageResponse.status_code == 200:
+    with open(RAW_EVENTS_RESPONSE_FILE, 'wb') as f:
+      raw_events_html_compressed = gzip.compress(bytes(eventsPageResponse.text, 'utf-8'))
+      f.write(raw_events_html_compressed)
+
+with open(RAW_EVENTS_RESPONSE_FILE, "rb") as f:
+  raw_events_html = gzip.decompress(f.read()).decode('utf-8')
+  eventsFromWsdc = parseEventsFromWsdcEventsPageHtml(raw_events_html)
 
 print("Made {} requests to WSDC".format(number_of_requests_to_wsdc))
 
@@ -199,7 +251,7 @@ database = {
     "events": [],
     "events_count": 0,
     'top_dancers_by_points_gained_recently': {},
-    'past_events_that_may_be_recurring': [],
+    'upcoming_events': eventsFromWsdc,
     'new_dancers_over_time': [],
 }
 
@@ -329,15 +381,6 @@ unkeyed_by_division = sorted(unkeyed_by_division, key=lambda division: division[
 
 database["top_dancers_by_points_gained_recently"] = unkeyed_by_division
 
-
-# Past events that may be coming back up
-min_date = (datetime.date.today().replace(day=1) - datetime.timedelta(days=(30 * 11))).replace(day=1) # 11 months ago
-max_date = (datetime.date.today().replace(day=1) - datetime.timedelta(days=(30 * 10))).replace(day=1) # 10 months ago
-
-for event in database['events']:
-  valid_dates = [d for d in event['dates'] if datetime.date.fromisoformat(d) >= min_date and datetime.date.fromisoformat(d) <= max_date]
-  if len(valid_dates) > 0:
-    database["past_events_that_may_be_recurring"].append(event['id'])
 
 database["dancers_count"] = len(database["dancers"])
 database["events_count"] = len(database["events"])
