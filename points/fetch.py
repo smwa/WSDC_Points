@@ -15,6 +15,7 @@ SKIP_FETCH = False
 if "SKIPFETCH" in environ:
   SKIP_FETCH = True
 COMPETITION_RECENCY_LIMIT_IN_MONTHS = 36
+CHUNKED_DANCERS_SIZE = 20
 
 API_URL = "https://points.worldsdc.com/lookup2020/find"
 NONE_SLIDE_LIMIT = 200
@@ -398,3 +399,23 @@ with open("../assets/events.txt", 'bw') as f:
 # Write to json for jekyll, leave at bottom of this script
 with open("../_data/database.json", 'w') as f:
     json.dump(database, f)
+
+# Write out chunked dancers # WARNING THIS MODIFIES THE DATABASE OBJECT
+i = 0
+max_wsdc_id = database["dancers"][0]["id"]
+while i <= max_wsdc_id:
+  top = i + CHUNKED_DANCERS_SIZE
+  chunk_ingress = [d for d in database["dancers"] if d["id"] >= i and d["id"] < top]
+  for dancer in chunk_ingress:
+      dancer["primary_role"] = database["roles"][dancer["primary_role"]]
+      for placement in dancer["placements"]:
+        placement["division"] = database["divisions"][placement["division"]]
+        placement["role"] = database["roles"][placement["role"]]
+        placement["event"] = [e for e in database["events"] if e["id"] == placement["event"]][0]
+        if "dates" in placement["event"]:
+          del placement["event"]["dates"]
+        if "url" in placement["event"]:
+          del placement["event"]["url"]
+  with open("../assets/chunks/dancers_{}-{}.json".format(i, i+CHUNKED_DANCERS_SIZE), 'w') as f:
+    json.dump({"dancers": chunk_ingress}, f)
+  i += CHUNKED_DANCERS_SIZE

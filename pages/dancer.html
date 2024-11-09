@@ -16,12 +16,12 @@ previous_page: /dancers
 <script>
 
 
-  const getPointsByDivision = (db, dancer) => {
+  const getPointsByDivision = (dancer) => {
     const byDivision = [];
 
     dancer.placements.forEach((placement) => {
-      const division = db.divisions[placement.division];
-      const role = db.roles[placement.role];
+      const division = placement.division;
+      const role = placement.role;
       const points = placement.points;
       let added = false;
       byDivision.forEach((byDivisionItem) => {
@@ -54,15 +54,14 @@ previous_page: /dancers
   };
 
   const main = async () => {
-    const db = await getDatabase();
     const dancer_id = parseInt(window.location.hash.substring(1), 10);
-    const dancer = db.dancers.find((e) => e.id === dancer_id);
+    const dancer = await getDancer(dancer_id);
     
     document.getElementById("data-dancer-name").innerText = dancer.name;
     document.getElementById("data-dancer-id").innerText = dancer.id;
     
     let byDivisionHtml = "<tr><th>Points</th><th>Division</th><th>Role</th></tr>";
-    getPointsByDivision(db, dancer).forEach((byDivision) => {
+    getPointsByDivision(dancer).forEach((byDivision) => {
       byDivisionHtml += `<tr><td>${byDivision.points}</td><td>${byDivision.division}</td><td>${byDivision.role}</td></tr>`;
     });
     document.getElementById("data-dancer-by-division").innerHTML = byDivisionHtml;
@@ -76,11 +75,11 @@ previous_page: /dancers
       placementsHtml += "</div>";
 
       placementsHtml += `<a href="/event#${placement.event}">`;
-      placementsHtml += db.events.find((e) => e.id === placement.event).name;
+      placementsHtml += placement.event.name;
       placementsHtml += "</a>";
       
       placementsHtml += "<div>";
-      placementsHtml += `${db.divisions[placement.division]} ${db.roles[placement.role]}`;
+      placementsHtml += `${placement.division} ${placement.role}`;
       placementsHtml += "</div>";  
         
       placementsHtml += "<div>";
