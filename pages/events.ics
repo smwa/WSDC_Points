@@ -13,7 +13,7 @@ SUMMARY:{{event.name | smartify | normalize_whitespace}} ({{event.type}})
 DTSTART;VALUE=DATE:{{event.start_date | date: "%Y%m%d"}}
 DTEND;VALUE=DATE:{{event.end_date | date: "%Y%m%d"}}
 LOCATION:{{event.location | smartify | normalize_whitespace}}
-DESCRIPTION:{{event.url}}\n\nhttps://wsdc.mechstack.dev/upcoming_events to see all events.
+DESCRIPTION:{{event.url}}\n\nhttps://wsdc.mechstack.dev/upcoming-events to see all events.
 UID:{{event.start_date}}-{{event.name | smartify | normalize_whitespace | slugify}}@wsdc.mechstack.dev
 DTSTAMP:{{site.time | date: "%Y%m%dT%H%M%SZ"}}
 STATUS:CONFIRMED
