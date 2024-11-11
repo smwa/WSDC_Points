@@ -6,7 +6,12 @@ previous_page: /
 next_page: /dancers-on-the-rise
 ---
 
-<div>Upcoming events</div>
+<h3>Upcoming events</h3>
+<h5>
+  <a target="_blank" href="webcal://wsdc.mechstack.dev/wsdc_events.ics">Subscribe (may not work on all devices)</a>
+  -
+  <button onclick='navigator.clipboard.writeText("https://wsdc.mechstack.dev/wsdc_events.ics"); this.innerHTML = "Copied!";'>Copy Calendar URL</button>
+</h5>
 
 {% for event in site.data.database.upcoming_events %}
   <div class="event-item">
