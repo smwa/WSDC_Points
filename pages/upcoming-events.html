@@ -13,19 +13,62 @@ next_page: /dancers-on-the-rise
   <button onclick='navigator.clipboard.writeText("https://wsdc.mechstack.dev/wsdc_events.ics"); this.innerHTML = "Copied!";'>Copy Calendar URL</button>
 </h5>
 
+<script src="lib/list.min.js"></script>
+
+<div id="listcontainer">
+
+  <input type="search" class="search" placeholder="Search" autofocus="autofocus" />
+
+  <ul class="list"></ul>
+
+</div>
+
+<script>
+  const main = async () => {
+    const events = [
 {% for event in site.data.database.upcoming_events %}
-  <div class="event-item">
-    <h4>
-      {{ event.name }}
-    </h4>
-    <h6>
-      {{ event.start_date | date_to_long_string: "ordinal", "US" }}
-      -
-      {{ event.end_date | date_to_long_string: "ordinal", "US" }}
-    </h6>
-    <div>
-      <a target="_blank" href="{{ event.url }}">{{ event.url }}</a>
-    </div>
-    <div>{{ event.location }}</div>
-  </div>
+{
+url: "{{event.url | smartify | normalize_whitespace}}",
+name: "{{event.name | smartify | normalize_whitespace }}",
+location: "{{event.location | smartify | normalize_whitespace }}",
+start_date: '{{ event.start_date | date_to_long_string: "ordinal", "US" }}',
+end_date: '{{ event.end_date | date_to_long_string: "ordinal", "US" }}',
+},
 {% endfor %}
+    ];
+
+    const options = {
+      page: 1000,
+      indexAsync: true,
+      searchColumns: [
+        "name",
+        "location",
+        "start_date",
+      ],
+      valueNames: [
+        "name",
+        "location",
+        "url",
+        "start_date",
+        "end_date",
+      ],
+      item: (event) => `
+        <li>
+          <h4>
+            ${event.name}
+          </h4>
+          <h6>
+            ${event.start_date} - ${event.end_date}
+          </h6>
+          <div>
+            <a target="_blank" href="${event.url}">${event.url}</a>
+          </div>
+          <div>${event.location}</div>
+        </li>
+      `,
+    };
+
+    new List('listcontainer', options, events);
+  };
+  main();
+</script>

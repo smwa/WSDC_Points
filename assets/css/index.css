@@ -87,14 +87,6 @@ a.main-nav-button {
     right: 1rem;
 }
 
-/* Upcoming Events Page */
-.event-item {
-    padding: 0 0 1rem 0;
-    flex: 0;
-    border-bottom: 1px solid #aaaaaa;
-}
-/* End Upcoming Events Page */
-
 /* Events Page */
 .division {
     padding: 1rem 0 1rem 0;
@@ -138,8 +130,8 @@ ul {
 
 ul > * {
     font-size: 28px;
-    padding-top: 0.9rem;
-    padding-bottom: 0.2rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
     border-bottom: 1px solid #dddddd;
 }
 
