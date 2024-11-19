@@ -14,56 +14,14 @@ next_page: /about
 <script src="lib/chartjs-chart-boxplot/build/index.umd.min.js"></script>
 <script>
   const main = async () => {
-    const db = await getDatabase();
-    const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
-
-    const divisions_plus_top = db.ordered_skill_divisions;
-    const data_all_by_key = {};
-
-    db.dancers.forEach(dancer => {
-      const earliest_date_by_division = {};
-
-      dancer.placements
-        .filter(p => p.role === dancer.primary_role)
-        .forEach(placement => {
-          const placement_date = new Date(placement.date);
-          if (!(placement.division in earliest_date_by_division)) {
-            earliest_date_by_division[placement.division] = placement_date;
-          }
-          else {
-            if (placement_date < earliest_date_by_division[placement.division]) {
-              earliest_date_by_division[placement.division] = placement_date;
-            }
-          }
-        });
-
-        for (let i = 1; i < divisions_plus_top.length; i++) {
-          const from_division = divisions_plus_top[i-1];
-          const to_division = divisions_plus_top[i];
-          if (!(from_division in earliest_date_by_division) || !(to_division in earliest_date_by_division)) {
-            continue;
-          }
-          const from_division_date = earliest_date_by_division[from_division];
-          const to_division_date = earliest_date_by_division[to_division];
-          const days = Math.round(Math.abs((to_division_date.getTime() - from_division_date.getTime()) / ONE_DAY_IN_MS))
-          if (!(from_division in data_all_by_key)) {
-            data_all_by_key[from_division] = [];
-          }
-          data_all_by_key[from_division].push(days);
-        }
-
-    });
-
-
-    const data_all = [];
-    const labels = [];
-
-    for (let i = 1; i < divisions_plus_top.length; i++) {
-      const from_division = divisions_plus_top[i-1];
-      const to_division = divisions_plus_top[i];
-      labels.push(db.divisions[from_division]);
-      data_all.push(data_all_by_key[from_division]);
-    }
+    const data = [
+{% for data in site.data.database.division_progression.data %}[{% for datum in data %}{{ datum }},{% endfor %}],{% endfor %}
+    ];
+    const labels = [
+      {% for label in site.data.database.division_progression.labels %}
+        "{{ label }}",
+      {% endfor %}
+    ];
 
     const options = {
       meanRadius: 0,
@@ -118,7 +76,7 @@ next_page: /about
             minStats: 'min',
             maxStats: 'whiskerMax',
             label: "All",
-            data: data_all,
+            data: data,
           }, 
         ]
       },

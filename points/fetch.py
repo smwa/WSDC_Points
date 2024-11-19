@@ -254,6 +254,7 @@ database = {
     'top_dancers_by_points_gained_recently': {},
     'upcoming_events': eventsFromWsdc,
     'new_dancers_over_time': [],
+    'division_progression': {"labels": [], "data": []},
 }
 
 def addEvents(_events, new_events):
@@ -382,6 +383,42 @@ unkeyed_by_division = sorted(unkeyed_by_division, key=lambda division: division[
 
 database["top_dancers_by_points_gained_recently"] = unkeyed_by_division
 
+
+# Division Progression
+divisions_plus_top = database['ordered_skill_divisions']
+data_all_by_key = {}
+
+for dancer in database["dancers"]:
+  earliest_date_by_division = {}
+
+  for placement in dancer["placements"]:
+    if dancer["primary_role"] != placement["role"]:
+      continue
+
+    placement_date = datetime.date.fromisoformat(placement["date"])
+    if not placement["division"] in earliest_date_by_division:
+      earliest_date_by_division[placement["division"]] = placement_date
+    elif placement_date < earliest_date_by_division[placement["division"]]:
+        earliest_date_by_division[placement["division"]] = placement_date
+
+  for i in range(1, len(divisions_plus_top)):
+    from_division = divisions_plus_top[i-1]
+    to_division = divisions_plus_top[i]
+    if not (from_division in earliest_date_by_division and to_division in earliest_date_by_division):
+      continue
+    from_division_date = earliest_date_by_division[from_division]
+    to_division_date = earliest_date_by_division[to_division]
+    days = abs((to_division_date - from_division_date).days)
+    if from_division not in data_all_by_key:
+      data_all_by_key[from_division] = []
+    data_all_by_key[from_division].append(days)
+
+for i in range(0, len(divisions_plus_top) - 1):
+  from_division = divisions_plus_top[i]
+  database["division_progression"]["labels"].append(database["divisions"][from_division])
+  database["division_progression"]["data"].append(data_all_by_key[from_division])
+
+# End Division Progression
 
 database["dancers_count"] = len(database["dancers"])
 database["events_count"] = len(database["events"])
