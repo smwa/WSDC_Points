@@ -24,8 +24,7 @@ next_page: /dancers-on-the-rise
 </div>
 
 <script>
-  const main = async () => {
-    const events = [
+  const events = [
 {% for event in site.data.database.upcoming_events %}
 {
 url: "{{event.url | smartify | normalize_whitespace}}",
@@ -33,9 +32,30 @@ name: "{{event.name | smartify | normalize_whitespace }}",
 location: "{{event.location | smartify | normalize_whitespace }}",
 start_date: '{{ event.start_date | date_to_long_string: "ordinal", "US" }}',
 end_date: '{{ event.end_date | date_to_long_string: "ordinal", "US" }}',
+latitude: {{ event.latitude | default: 'null' }},
+longitude: {{ event.longitude | default: 'null' }},
+distance: 0,
 },
 {% endfor %}
-    ];
+  ];
+
+  let listObject = null;
+  let userLocation = null;
+  let isMetric = false;
+
+  const sortByDistance = async () => {
+    // TODO get user position, estimated or exact
+    // TODO update .distance in events
+    // TODO force rerender
+  };
+
+  const getDistanceString = (eventDistance) => {
+    if (eventDistance < 1) return "";
+    if (isMetric) return `(${eventDistance} Km)`;
+    return `(${eventDistance * 0.621371} miles)`;
+  };
+
+  const main = async () => {
 
     const options = {
       page: 1000,
@@ -51,8 +71,7 @@ end_date: '{{ event.end_date | date_to_long_string: "ordinal", "US" }}',
         "url",
         "start_date",
         "end_date",
-        "latitude",
-        "longitude",
+        "distance",
       ],
       item: (event) => `
         <li>
@@ -65,12 +84,12 @@ end_date: '{{ event.end_date | date_to_long_string: "ordinal", "US" }}',
           <div>
             <a target="_blank" href="${event.url}">${event.url}</a>
           </div>
-          <div>${event.location}</div>
+          <div>${event.location} ${getDistanceString(event.distance)}</div>
         </li>
       `,
     };
 
-    new List('listcontainer', options, events);
+    listObject = new List('listcontainer', options, events);
   };
   main();
 </script>
