@@ -7,6 +7,7 @@ from dateutil.relativedelta import relativedelta
 import msgpack
 import gzip
 from os import environ
+import time
 
 FULL_DANCER_CHECK = False
 if "FULLDANCERCHECK" in environ:
@@ -16,6 +17,11 @@ if "SKIPFETCH" in environ:
   SKIP_FETCH = True
 COMPETITION_RECENCY_LIMIT_IN_MONTHS = 36
 CHUNKED_DANCERS_SIZE = 20
+
+LOCATION_CACHE_FILE = "./locations.json"
+OPEN_WEATHER_MAP_API_KEY = ""
+if "OPEN_WEATHER_MAP_API_KEY" in environ:
+  OPEN_WEATHER_MAP_API_KEY = environ["OPEN_WEATHER_MAP_API_KEY"]
 
 API_URL = "https://points.worldsdc.com/lookup2020/find"
 NONE_SLIDE_LIMIT = 200
@@ -71,6 +77,41 @@ raw_response_dancers = {} # Keyed by str(wsdc_id)
 with open(RAW_RESPONSE_FILE, "rb") as f:
   raw_response_dancers_json = gzip.decompress(f.read()).decode('utf-8')
   raw_response_dancers = json.loads(raw_response_dancers_json)
+
+location_cache = {}
+with open(LOCATION_CACHE_FILE, "r") as f:
+  location_cache = json.load(f)
+
+def get_location(location: str):
+  if location in location_cache:
+     return location_cache[location]
+  if SKIP_FETCH:
+    return None
+  time.sleep(1.1)
+  splits = [s.strip() for s in location.split(",")]
+  if len(splits) > 1 and len(splits[1]) == 2 and splits[1].isupper() and splits[1] != "UK":
+    if len(splits) < 3:
+      splits.append("US")
+    else:
+      splits[2] = "US"
+  requestable_location = ",".join(splits)
+  url = "http://api.openweathermap.org/geo/1.0/direct?q={}&limit=1&appid={}".format(requestable_location, OPEN_WEATHER_MAP_API_KEY)
+  r = requests.get(url)
+  if not r.ok:
+    print("No results for location {}".format(location))
+    location_cache[location] = []
+    return []
+  jsonResult = r.json()
+  if len(jsonResult) < 1:
+    print("No results for location {}".format(location))
+    location_cache[location] = []
+    return []
+  ret = None
+  latitude = jsonResult[0]["lat"]
+  longitude = jsonResult[0]["lon"]
+  ret = (latitude, longitude)
+  location_cache[location] = ret
+  return ret
 
 def fetch_and_save_dancer(wsdc_id):
   res = get_dancer("{}".format(wsdc_id))
@@ -269,6 +310,7 @@ def addEvents(_events, new_events):
           "id": new_event["id"],
           "name": new_event['name'],
           "location": new_event['location'],
+          "latlon": get_location(new_event['location']),
           "url": new_event['url'],
           'dates': [],
         }
@@ -422,6 +464,10 @@ for i in range(0, len(divisions_plus_top) - 1):
 
 database["dancers_count"] = len(database["dancers"])
 database["events_count"] = len(database["events"])
+
+# Write out locations
+with open(LOCATION_CACHE_FILE, 'w') as f:
+  json.dump(location_cache, f)
 
 # Write to file, leave at bottom of this script
 with open("../assets/database.txt", 'bw') as f:
