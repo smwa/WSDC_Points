@@ -59,6 +59,11 @@ SKILL_DIVISION_PROGRESSION = [DIVISIONS_MAP_INVERTED[d] for d in [
   'Champions',
 ]]
 
+# Why do you do this to us, WSDC?
+LOCATION_PATCHES = {
+   "Swing Fling": "Washington, D.C., US"
+}
+
 number_of_requests_to_wsdc = 0
 
 def get_dancer(wsdc_id: str):
@@ -82,7 +87,11 @@ location_cache = {}
 with open(LOCATION_CACHE_FILE, "r") as f:
   location_cache = json.load(f)
 
-def get_location(location: str):
+def get_location(name: str, location: str):
+  if (location == "" or location is None) and name not in LOCATION_PATCHES:
+     print("Location patch miss for '{}'".format(name))
+  if (location == "" or location is None) and name in LOCATION_PATCHES:
+     location = LOCATION_PATCHES[name]
   if location in location_cache:
      return location_cache[location]
   if SKIP_FETCH:
@@ -185,7 +194,7 @@ def parseEventsFromWsdcEventsPageHtml(html):
     tds = row.find_all('td')
     date = tds[0].get_text()
     location = tds[2].get_text()
-    name = tds[1].find("div", class_="event_name").get_text()
+    name = tds[1].find("div", class_="event_name").get_text().strip()
     url = tds[1].find("a")['href']
     event_type = tds[1].find("div", class_="event_type").get_text()
 
@@ -206,9 +215,7 @@ def parseEventsFromWsdcEventsPageHtml(html):
       end_date = datetime.datetime(int(year), month, int(day)).isoformat()
     except Exception as e:
       raise e
-      print("Failed with date {}".format(date))
-      continue
-    latlon = get_location(location)
+    latlon = get_location(name, location)
     latitude = None
     longitude = None
     if len(latlon) >= 2:

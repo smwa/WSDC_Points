@@ -12,6 +12,9 @@ next_page: /dancers-on-the-rise
   -
   <button onclick='navigator.clipboard.writeText("https://wsdc.mechstack.dev/wsdc_events.ics"); this.innerHTML = "Copied!";'>Copy Calendar URL</button>
 </h5>
+<h5>
+  <button onclick='sortByDistance()'>Sort By Distance</button>
+</h5>
 
 <script src="lib/list.min.js"></script>
 
@@ -41,55 +44,110 @@ distance: 0,
 
   let listObject = null;
   let userLocation = null;
-  let isMetric = false;
+  let isMetric = true;
 
-  const sortByDistance = async () => {
-    // TODO get user position, estimated or exact
-    // TODO update .distance in events
-    // TODO force rerender
+  const geoip = (location) => {
+    userLocation = location;
+    if (location.country === "United States") {
+      isMetric = false;
+    }
+    console.log(userLocation);
   };
+
+  function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
+    var R = 6371; // Radius of the earth in km
+    var dLat = deg2rad(lat2-lat1);  // deg2rad below
+    var dLon = deg2rad(lon2-lon1); 
+    var a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2)
+      ; 
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+    var d = R * c; // Distance in km
+    return d;
+  }
+
+  function deg2rad(deg) {
+    return deg * (Math.PI/180)
+  }
 
   const getDistanceString = (eventDistance) => {
     if (eventDistance < 1) return "";
-    if (isMetric) return `(${eventDistance} Km)`;
-    return `(${eventDistance * 0.621371} miles)`;
+    if (isMetric) return `(${Math.round(eventDistance).toLocaleString('en')} Km away)`;
+    return `(${Math.round(eventDistance * 0.621371).toLocaleString('en')} miles away)`;
+  };
+
+  const options = {
+    page: 1000,
+    indexAsync: true,
+    searchColumns: [
+      "name",
+      "location",
+      "start_date",
+    ],
+    valueNames: [
+      "name",
+      "location",
+      "url",
+      "start_date",
+      "end_date",
+      "distance",
+      "latitude",
+      "longitude",
+    ],
+    item: (event) => `
+      <li>
+        <h4>
+          ${event.name}
+        </h4>
+        <h6>
+          ${event.start_date} - ${event.end_date}
+        </h6>
+        <div>
+          <a target="_blank" href="${event.url}">${event.url}</a>
+        </div>
+        <div>${event.location} ${getDistanceString(event.distance)}</div>
+      </li>
+    `,
+  };
+
+  const updateListEventDistances = async () => {
+    await Promise.all(events.map(async (event) => {
+      if (
+        userLocation.latitude == null
+        || userLocation.longitude == null
+        || event.latitude == null
+        || event.longitude == null
+      ) {
+        return;
+      }
+      event.distance = getDistanceFromLatLonInKm(
+        userLocation.latitude, userLocation.longitude,
+        event.latitude, event.longitude
+      );
+    }));
+    listObject.clear();
+    listObject.add(events, () => {
+      listObject.sort('distance', { order: "asc" });
+    });
+  }
+
+  const sortByDistance = () => {
+    if (navigator.geolocation && (!userLocation || userLocation.accuracy >= 50)) {
+      navigator.geolocation.getCurrentPosition(currentPosition => {
+        userLocation = currentPosition.coords;
+        updateListEventDistances();
+        console.log(userLocation);
+      });
+    }
+
+    updateListEventDistances();
   };
 
   const main = async () => {
-
-    const options = {
-      page: 1000,
-      indexAsync: true,
-      searchColumns: [
-        "name",
-        "location",
-        "start_date",
-      ],
-      valueNames: [
-        "name",
-        "location",
-        "url",
-        "start_date",
-        "end_date",
-        "distance",
-      ],
-      item: (event) => `
-        <li>
-          <h4>
-            ${event.name}
-          </h4>
-          <h6>
-            ${event.start_date} - ${event.end_date}
-          </h6>
-          <div>
-            <a target="_blank" href="${event.url}">${event.url}</a>
-          </div>
-          <div>${event.location} ${getDistanceString(event.distance)}</div>
-        </li>
-      `,
-    };
-
     listObject = new List('listcontainer', options, events);
   };
   main();
 </script>
+<script src="https://get.geojs.io/v1/ip/geo.js"></script>
