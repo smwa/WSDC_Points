@@ -86,7 +86,7 @@ def get_location(location: str):
   if location in location_cache:
      return location_cache[location]
   if SKIP_FETCH:
-    return None
+    return []
   time.sleep(1.1)
   splits = [s.strip() for s in location.split(",")]
   if len(splits) > 1 and len(splits[1]) == 2 and splits[1].isupper() and splits[1] != "UK":
@@ -208,9 +208,17 @@ def parseEventsFromWsdcEventsPageHtml(html):
       raise e
       print("Failed with date {}".format(date))
       continue
+    latlon = get_location(location)
+    latitude = None
+    longitude = None
+    if len(latlon) >= 2:
+      latitude = latlon[0]
+      longitude = latlon[1]
     ret.append({
       "name": name,
       "location": location,
+      "latitude": latitude,
+      "longitude": longitude,
       "url": url,
       "type": event_type,
       "end_date": end_date,
@@ -310,7 +318,6 @@ def addEvents(_events, new_events):
           "id": new_event["id"],
           "name": new_event['name'],
           "location": new_event['location'],
-          "latlon": get_location(new_event['location']),
           "url": new_event['url'],
           'dates': [],
         }

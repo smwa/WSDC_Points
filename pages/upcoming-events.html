@@ -51,6 +51,8 @@ end_date: '{{ event.end_date | date_to_long_string: "ordinal", "US" }}',
         "url",
         "start_date",
         "end_date",
+        "latitude",
+        "longitude",
       ],
       item: (event) => `
         <li>
