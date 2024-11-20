@@ -30,6 +30,8 @@ jobs:
       
       # Runs a set of commands using the runners shell
       - name: Run fetch.py
+        env:
+          OPEN_WEATHER_MAP_API_KEY: ${{ secrets.OPEN_WEATHER_MAP_API_KEY }}
         run: |
           cd points
           python fetch.py
