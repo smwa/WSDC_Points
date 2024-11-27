@@ -7,9 +7,10 @@ previous_page: /dancers
 
 <h2><span id="data-dancer-name"></span> (<span id="data-dancer-id"></span>)</h2>
 
-
+<h3>Points</h3>
 <table id="data-dancer-by-division"></table>
 
+<h3>Placements</h3>
 <div id="data-dancer-placements" class="placements"></div>
 
 
@@ -23,20 +24,29 @@ previous_page: /dancers
       const division = placement.division;
       const role = placement.role;
       const points = placement.points;
-      let added = false;
+
+      let divisionExists = false;
       byDivision.forEach((byDivisionItem) => {
-        if (byDivisionItem.division === division && byDivisionItem.role === role) {
-          byDivisionItem.points += points;
-          added = true;
+        if (byDivisionItem.division === division) {
+          divisionExists = true;
         }
       });
-      if (!added) {
+
+      if (!divisionExists) {
         byDivision.push({
           division: division || 'Unknown',
-          role: role || 'Unknown',
-          points: points,
+          points: {},
         });
       }
+
+      byDivision.forEach((byDivisionItem) => {
+        if (byDivisionItem.division === division) {
+          if (!(role in byDivisionItem.points)) {
+            byDivisionItem.points[role] = 0;
+          }
+          byDivisionItem.points[role] += points;
+        }
+      });
     });
 
     return byDivision;
@@ -60,9 +70,15 @@ previous_page: /dancers
     document.getElementById("data-dancer-name").innerText = dancer.name;
     document.getElementById("data-dancer-id").innerText = dancer.id;
     
-    let byDivisionHtml = "<tr><th>Points</th><th>Division</th><th>Role</th></tr>";
+    let byDivisionHtml = "<tr><th>Leader</th><th>Follower</th><th>Division</th></tr>";
     getPointsByDivision(dancer).forEach((byDivision) => {
-      byDivisionHtml += `<tr><td>${byDivision.points}</td><td>${byDivision.division}</td><td>${byDivision.role}</td></tr>`;
+      byDivisionHtml += `
+        <tr>
+          <td>${byDivision.points.Leader || ""}</td>
+          <td>${byDivision.points.Follower || ""}</td>
+          <td>${byDivision.division}</td>
+        </tr>
+      `;
     });
     document.getElementById("data-dancer-by-division").innerHTML = byDivisionHtml;
 
