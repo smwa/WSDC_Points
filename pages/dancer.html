@@ -74,8 +74,8 @@ previous_page: /dancers
     getPointsByDivision(dancer).forEach((byDivision) => {
       byDivisionHtml += `
         <tr>
-          <td>${byDivision.points.Leader || ""}</td>
-          <td>${byDivision.points.Follower || ""}</td>
+          <td>${byDivision.points.Leader || "-"}</td>
+          <td>${byDivision.points.Follower || "-"}</td>
           <td>${byDivision.division}</td>
         </tr>
       `;
