@@ -90,7 +90,7 @@ previous_page: /dancers
       placementsHtml += (new Date(placement.date)).toLocaleDateString('en-US', {month: 'long', day: 'numeric', year: 'numeric'});
       placementsHtml += "</div>";
 
-      placementsHtml += `<a href="/event#${placement.event}">`;
+      placementsHtml += `<a href="/event#${placement.event.id}">`;
       placementsHtml += placement.event.name;
       placementsHtml += "</a>";
       
