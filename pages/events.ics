@@ -9,7 +9,7 @@ METHOD:PUBLISH
 X-WR-CALNAME:WSDC Events - Mechstack
 X-WR-TIMEZONE:Etc/GMT
 {% for event in site.data.database.upcoming_events %}BEGIN:VEVENT
-SUMMARY:{{event.name | smartify | normalize_whitespace}}{% if event.type %} ({{event.type}}){% endif %}
+SUMMARY:{{event.name | smartify | normalize_whitespace}}{% if event.type and event.type != '' %} ({{event.type}}){% endif %}
 DTSTART;VALUE=DATE:{{event.start_date | date: "%Y%m%d"}}
 DTEND;VALUE=DATE:{{event.end_date | date: "%Y%m%d"}}
 LOCATION:{{event.location | smartify | normalize_whitespace}}
