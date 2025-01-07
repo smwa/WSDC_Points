@@ -380,9 +380,11 @@ def getCompetableDivisions(role_id, placements):
 
   if CHAMPIONS in points_per_division:
     competableDivisions.append(CHAMPIONS)
+    if points_per_division[CHAMPIONS] < SKILL_DIVISION_LIMITS[CHAMPIONS][1]:
+      competableDivisions.append(ALLSTARS)
 
-  if ALLSTARS in points_per_division:
-    if points_per_division[ALLSTARS] >= SKILL_DIVISION_LIMITS[ALLSTARS][0] and CHAMPIONS not in competableDivisions:
+  elif ALLSTARS in points_per_division:
+    if points_per_division[ALLSTARS] >= SKILL_DIVISION_LIMITS[ALLSTARS][0]:
       competableDivisions.append(CHAMPIONS)
     if points_per_division[ALLSTARS] < SKILL_DIVISION_LIMITS[ALLSTARS][1]:
       competableDivisions.append(ALLSTARS)
