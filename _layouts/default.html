@@ -29,7 +29,6 @@
 
 </head>
 <body style='background-image: url("assets/img/{{ page.background_image }}");'>
-
   {% if page.previous_page %}
   <a class="previous main-nav-button" href="{{ page.previous_page }}">&lt;</a>
   {% endif %}
@@ -41,7 +40,6 @@
   <div class="body-container">
     {{ content }}
   </div>
-
 
   <script>
     {% if jekyll.environment != "development" %}

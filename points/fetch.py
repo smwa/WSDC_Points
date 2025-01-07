@@ -15,7 +15,7 @@ if "FULLDANCERCHECK" in environ:
 SKIP_FETCH = False
 if "SKIPFETCH" in environ:
   SKIP_FETCH = True
-COMPETITION_RECENCY_LIMIT_IN_MONTHS = 36
+COMPETITION_RECENCY_LIMIT_IN_MONTHS = 15
 CHUNKED_DANCERS_SIZE = 20
 
 LOCATION_CACHE_FILE = "./locations.json"
@@ -35,11 +35,11 @@ ROLES_MAP = {
 }
 DIVISIONS_MAP = {
     12: 'Teacher',
-    11: 'All-Stars',
-    10: 'Champions',
-    9: 'Invitational',
-    8: 'Sophisticated',
-    7: 'Professional',
+    11: 'Invitational',
+    10: 'Sophisticated',
+    9: 'Professional',
+    8: 'Champions',
+    7: 'All-Stars',
     6: 'Advanced',
     5: 'Intermediate',
     4: 'Novice',
@@ -58,6 +58,33 @@ SKILL_DIVISION_PROGRESSION = [DIVISIONS_MAP_INVERTED[d] for d in [
   'All-Stars',
   'Champions',
 ]]
+
+SKILL_DIVISION_LIMITS = {DIVISIONS_MAP_INVERTED[d[0]]:(d[1], d[2]) for d in [
+  ('Champions', 1, 10),
+  ('All-Stars', 150, 225),
+  ('Advanced', 60, 90),
+  ('Intermediate', 30, 45),
+  ('Novice', 16, 30),
+  ('Newcomer', 0, 1),
+]}
+
+LEADER = ROLES_MAP_INVERTED["Leader"]
+FOLLOWER = ROLES_MAP_INVERTED["Follower"]
+SWITCH = ROLES_MAP_INVERTED["Switch"]
+
+TEACHER = DIVISIONS_MAP_INVERTED['Teacher']
+INVITATIONAL = DIVISIONS_MAP_INVERTED['Invitational']
+SOPHISTICATED = DIVISIONS_MAP_INVERTED['Sophisticated']
+PROFESSIONAL = DIVISIONS_MAP_INVERTED['Professional']
+CHAMPIONS = DIVISIONS_MAP_INVERTED['Champions']
+ALLSTARS = DIVISIONS_MAP_INVERTED['All-Stars']
+ADVANCED = DIVISIONS_MAP_INVERTED['Advanced']
+INTERMEDIATE = DIVISIONS_MAP_INVERTED['Intermediate']
+NOVICE = DIVISIONS_MAP_INVERTED['Novice']
+NEWCOMER = DIVISIONS_MAP_INVERTED['Newcomer']
+MASTERS = DIVISIONS_MAP_INVERTED['Masters']
+JUNIORS = DIVISIONS_MAP_INVERTED['Juniors']
+
 
 # Why do you do this to us, WSDC?
 LOCATION_PATCHES = {
@@ -272,7 +299,7 @@ def placementsToList(placements, raw_dancer):
         for division_key in style:
             division = style[division_key]
             division_name = division["division"]["name"].title()
-            division_name = DIVISIONS_MAP_INVERTED[division_name]
+            division_id = DIVISIONS_MAP_INVERTED[division_name]
             for competition in division["competitions"]:
                 competition_date = datetime.datetime.strptime(competition["event"]["date"], '%B %Y')
                 if earliest_event is None or competition_date < earliest_event:
@@ -294,7 +321,7 @@ def placementsToList(placements, raw_dancer):
                     "points": points,
                     "event": event['id'],
                     "date": event["date"],
-                    "division": division_name,
+                    "division": division_id,
                 })
     return (final_placements, final_events, earliest_event)
 
@@ -341,6 +368,49 @@ def addEvents(_events, new_events):
 
 new_dancers_by_date = {}
 
+def getCompetableDivisions(role_id, placements):
+  points_per_division = {}
+  for placement in placements:
+    if placement["role"] != role_id:
+      continue
+    if placement["division"] not in points_per_division:
+      points_per_division[placement["division"]] = 0
+    points_per_division[placement["division"]] += placement["points"]
+  competableDivisions = []
+
+  if CHAMPIONS in points_per_division:
+    competableDivisions.append(CHAMPIONS)
+
+  if ALLSTARS in points_per_division:
+    if points_per_division[ALLSTARS] >= SKILL_DIVISION_LIMITS[ALLSTARS][0] and CHAMPIONS not in competableDivisions:
+      competableDivisions.append(CHAMPIONS)
+    if points_per_division[ALLSTARS] < SKILL_DIVISION_LIMITS[ALLSTARS][1]:
+      competableDivisions.append(ALLSTARS)
+
+  elif ADVANCED in points_per_division:
+    if points_per_division[ADVANCED] >= SKILL_DIVISION_LIMITS[ADVANCED][0]:
+      competableDivisions.append(ALLSTARS)
+    if points_per_division[ADVANCED] < SKILL_DIVISION_LIMITS[ADVANCED][1]:
+      competableDivisions.append(ADVANCED)
+
+  elif INTERMEDIATE in points_per_division:
+    if points_per_division[INTERMEDIATE] >= SKILL_DIVISION_LIMITS[INTERMEDIATE][0]:
+      competableDivisions.append(ADVANCED)
+    if points_per_division[INTERMEDIATE] < SKILL_DIVISION_LIMITS[INTERMEDIATE][1]:
+      competableDivisions.append(INTERMEDIATE)
+
+  elif NOVICE in points_per_division:
+    if points_per_division[NOVICE] >= SKILL_DIVISION_LIMITS[NOVICE][0]:
+      competableDivisions.append(INTERMEDIATE)
+    if points_per_division[NOVICE] < SKILL_DIVISION_LIMITS[NOVICE][1]:
+      competableDivisions.append(NOVICE)
+
+  else:
+    competableDivisions.append(NOVICE)
+    competableDivisions.append(NEWCOMER)
+
+  return competableDivisions
+
 def addEarliestPlacement(dateOne: datetime.datetime|None, dateTwo: datetime.datetime|None):
   if dateOne is None and dateTwo is None:
     return
@@ -368,6 +438,10 @@ for raw_response_dancer_wsdc_id in raw_response_dancers:
       'primary_role': ROLES_MAP_INVERTED[datum["short_dominate_role"]],
       'name': "{} {}".format(datum["dancer_first"], datum["dancer_last"]),
       'placements': dancer_placements,
+      'divisions': {
+        LEADER: getCompetableDivisions(LEADER, dancer_placements),
+        FOLLOWER: getCompetableDivisions(FOLLOWER, dancer_placements),
+      },
     }
     if len(res['placements']) > 0:
         database["dancers"].append(res)
@@ -513,6 +587,7 @@ while i <= max_wsdc_id:
           del placement["event"]["dates"]
         if "url" in placement["event"]:
           del placement["event"]["url"]
+      dancer["divisions"] = {database["roles"][k]:[database["divisions"][d] for d in v] for k,v in dancer["divisions"].items()}
   with open("../assets/chunks/dancers_{}-{}.json".format(i, i+CHUNKED_DANCERS_SIZE), 'w') as f:
     json.dump({"dancers": chunk_ingress}, f)
   i += CHUNKED_DANCERS_SIZE

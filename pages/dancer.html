@@ -7,6 +7,9 @@ previous_page: /dancers
 
 <h2><span id="data-dancer-name"></span> (<span id="data-dancer-id"></span>)</h2>
 
+<h3>Can Compete</h3>
+<table id="data-dancer-competable-divisions"></table>
+
 <h3>Points</h3>
 <table id="data-dancer-by-division"></table>
 
@@ -66,10 +69,10 @@ previous_page: /dancers
   const main = async () => {
     const dancer_id = parseInt(window.location.hash.substring(1), 10);
     const dancer = await getDancer(dancer_id);
-    
+
     document.getElementById("data-dancer-name").innerText = dancer.name;
     document.getElementById("data-dancer-id").innerText = dancer.id;
-    
+
     let byDivisionHtml = "<tr><th>Leader</th><th>Follower</th><th>Division</th></tr>";
     getPointsByDivision(dancer).forEach((byDivision) => {
       byDivisionHtml += `
@@ -93,11 +96,11 @@ previous_page: /dancers
       placementsHtml += `<a href="/event#${placement.event.id}">`;
       placementsHtml += placement.event.name;
       placementsHtml += "</a>";
-      
+
       placementsHtml += "<div>";
       placementsHtml += `${placement.division} ${placement.role}`;
-      placementsHtml += "</div>";  
-        
+      placementsHtml += "</div>";
+
       placementsHtml += "<div>";
       placementsHtml += `Placed ${format_placement_result(placement.result)} for ${placement.points} points`;
       placementsHtml += "</div>";
@@ -105,6 +108,20 @@ previous_page: /dancers
       placementsHtml += "</div>";
     });
     document.getElementById("data-dancer-placements").innerHTML = placementsHtml;
+
+    competableDivisionsHtml = "<tr><th>Role</th><th>Division</th></tr>";
+    for (let role in dancer.divisions) {
+      dancer.divisions[role].forEach(division => {
+        competableDivisionsHtml += `
+          <tr>
+            <td>${role}</td>
+            <td>${division}</td>
+          </tr>
+        `;
+      });
+    }
+
+    document.getElementById("data-dancer-competable-divisions").innerHTML = competableDivisionsHtml;
 
   };
   main();
