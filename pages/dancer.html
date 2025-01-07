@@ -111,14 +111,12 @@ previous_page: /dancers
 
     competableDivisionsHtml = "<tr><th>Role</th><th>Division</th></tr>";
     for (let role in dancer.divisions) {
-      dancer.divisions[role].forEach(division => {
-        competableDivisionsHtml += `
+      competableDivisionsHtml += `
           <tr>
             <td>${role}</td>
-            <td>${division}</td>
+            <td>${dancer.divisions[role].join('/')}</td>
           </tr>
         `;
-      });
     }
 
     document.getElementById("data-dancer-competable-divisions").innerHTML = competableDivisionsHtml;
