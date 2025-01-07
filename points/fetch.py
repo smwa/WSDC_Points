@@ -405,6 +405,9 @@ def getCompetableDivisions(role_id, placements):
     if points_per_division[NOVICE] < SKILL_DIVISION_LIMITS[NOVICE][1]:
       competableDivisions.append(NOVICE)
 
+  elif NEWCOMER in points_per_division:
+    competableDivisions.append(NOVICE)
+
   else:
     competableDivisions.append(NOVICE)
     competableDivisions.append(NEWCOMER)
