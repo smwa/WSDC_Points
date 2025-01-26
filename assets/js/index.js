@@ -13,8 +13,8 @@ const getEventsDatabase = async () => {
 const getDancer = async (id) => {
   const bottom = Math.floor(id / DANCER_CHUNK_SIZE) * DANCER_CHUNK_SIZE;
   const top = bottom + DANCER_CHUNK_SIZE;
-  const file = `dancers_${bottom}-${top}.json`;
+  const file = `dancers_${bottom}-${top}.txt`;
   const response = await fetch("assets/chunks/"+file);
-  const dancers = (await response.json()).dancers;
+  const dancers = (await MessagePack.decodeAsync(response.body)).dancers;
   return dancers.find(dancer => dancer.id === id);
 };

@@ -593,6 +593,7 @@ while i <= max_wsdc_id:
         if "url" in placement["event"]:
           del placement["event"]["url"]
       dancer["divisions"] = {database["roles"][k]:[database["divisions"][d] for d in v] for k,v in dancer["divisions"].items()}
-  with open("../assets/chunks/dancers_{}-{}.json".format(i, i+CHUNKED_DANCERS_SIZE), 'w') as f:
-    json.dump({"dancers": chunk_ingress}, f)
+  with open("../assets/chunks/dancers_{}-{}.txt".format(i, i+CHUNKED_DANCERS_SIZE), 'bw') as f:
+    contents = msgpack.packb({"dancers": chunk_ingress},)
+    f.write(contents)
   i += CHUNKED_DANCERS_SIZE
