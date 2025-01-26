@@ -1,6 +1,6 @@
 ---
 permalink: /
-layout: default
+layout: javascripted
 background_image: swing_feet.webp
 previous_page: /events
 next_page: /upcoming-events
@@ -13,9 +13,33 @@ next_page: /upcoming-events
   <a href="/events">{{ site.data.database.events_count }} Events</a>
   <a href="/about">About Us</a>
 
+  <div class="favorite-dancers"></div>
+
   <a target="_blank" href="https://play.google.com/store/apps/details?id=dev.mechstack.wsdc.twa">
     <img alt="Get it on Google Play"
          src="./assets/icons/getItOnGooglePlay.svg" width="270" height="80" />
   </a>
 
 </div>
+
+<script>
+
+  const main = async () => {
+    const favoriteDancers = getFavoriteDancers();
+    if (favoriteDancers.length < 1) return;
+    const div = document.querySelector('.favorite-dancers');
+    div.innerHTML = "<h3>Favorites</h3>";
+    Promise.all(favoriteDancers.map(dancer_id => getDancer(dancer_id)))
+      .then(dancers => {
+        dancers.sort(function(a, b) { return (new Date(b.placements[0].date)) - (new Date(a.placements[0].date)); });
+        dancers.forEach(dancer => {
+          const mostRecent = new Date(dancer.placements[0].date);
+          const recency = new Date();
+          recency.setDate(recency.getDate() - 30);
+          div.innerHTML += `<div class="${mostRecent >= recency ? "recent-placement" : ""}"><a href="/dancer#${dancer.id}">${dancer.name}</a> last placed ${mostRecent.toLocaleDateString()}</div>`;
+        })
+      });
+
+  };
+  main();
+</script>

@@ -19,28 +19,44 @@ const getDancer = async (id) => {
   return dancers.find(dancer => dancer.id === id);
 };
 
-const __getLocalStore = async (store) => {
-  return JSON.parse(localStorage.wsdcpoints || {});
+const __getLocalStore = () => {
+  return JSON.parse(localStorage.wsdcpoints || '{}');
 };
 
-const __setLocalStore = async (store) => {
+const __setLocalStore = (store) => {
   localStorage.wsdcpoints = JSON.stringify(store);
 };
 
-const addFavoriteDancer = async (id) => {
-  const store = await __getLocalStore();
+const getFavoriteDancers = () => {
+  const store = __getLocalStore();
   if (!('favoriteDancers' in store)) {
-    store.favoriteDancers = [];
+    return [];
   }
-  store.favoriteDancers.push(id);
+  return store.favoriteDancers;
+};
+
+const setFavoriteDancers = (favoriteDancers) => {
+  const store = __getLocalStore();
+  store.favoriteDancers = favoriteDancers;
   __setLocalStore(store);
 };
 
-const removeFavoriteDancer = async (id) => {
-  const store = await __getLocalStore();
-  if (!('favoriteDancers' in store)) {
-    store.favoriteDancers = [];
-  }
-  store.favoriteDancers = store.favoriteDancers.filter(_id => _id !== id);
-  __setLocalStore(store);
+const getIsFavoritedDancer = (id) => {
+  return getFavoriteDancers().includes(id);
 };
+
+const addFavoriteDancer = (id) => {
+  const fd = getFavoriteDancers();
+  fd.push(id);
+  setFavoriteDancers(fd);
+};
+
+const removeFavoriteDancer = (id) => {
+  let fd = getFavoriteDancers();
+  fd = fd.filter(_id => _id !== id);
+  setFavoriteDancers(fd);
+};
+
+const updateIcons = async () => {
+  feather.replace();
+}

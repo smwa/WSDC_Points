@@ -5,7 +5,7 @@ background_image: swing_feet.webp
 previous_page: /dancers
 ---
 
-<h2><span id="data-dancer-name"></span> (<span id="data-dancer-id"></span>)</h2>
+<h2><span id="data-dancer-name"></span> (<span id="data-dancer-id"></span>) <i onclick="onClickStar()" data-feather="star" class="star-icon"></i></h2>
 
 <h3>Can Compete</h3>
 <table id="data-dancer-competable-divisions"></table>
@@ -19,6 +19,21 @@ previous_page: /dancers
 
 <script>
 
+  let dancer_id = null;
+  let isFavorited = false;
+
+  const onClickStar = () => {
+    const className = 'filled-icon';
+    isFavorited = !isFavorited;
+    if (isFavorited) {
+      addFavoriteDancer(dancer_id);
+      document.querySelector('.star-icon').classList.add(className);
+    }
+    else {
+      removeFavoriteDancer(dancer_id);
+      document.querySelector('.star-icon').classList.remove(className);
+    }
+  };
 
   const getPointsByDivision = (dancer) => {
     const byDivision = [];
@@ -67,7 +82,11 @@ previous_page: /dancers
   };
 
   const main = async () => {
-    const dancer_id = parseInt(window.location.hash.substring(1), 10);
+    dancer_id = parseInt(window.location.hash.substring(1), 10);
+    if (getIsFavoritedDancer(dancer_id)) {
+      isFavorited = true
+      document.querySelector('.star-icon').classList.add('filled-icon');
+    }
     const dancer = await getDancer(dancer_id);
 
     document.getElementById("data-dancer-name").innerText = dancer.name;

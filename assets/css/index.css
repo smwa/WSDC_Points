@@ -162,3 +162,20 @@ td {
     justify-content: center;
     flex: 1 1 auto;
 }
+
+.star-icon {
+    stroke: #bbbbbb;
+    width: 1.25em;
+    height: 1.25em;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+.filled-icon {
+    stroke: #ffd700;
+    fill: #ffd700;
+}
+
+.recent-placement {
+    font-weight: bolder;
+}
