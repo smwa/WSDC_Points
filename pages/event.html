@@ -28,7 +28,7 @@ previous_page: /events
     const datesElement = document.getElementById("data-event-dates");
     let dateHtml = "";
     event.dates.forEach((date) => {
-      dateHtml += `<li>${(new Date(date)).toLocaleDateString('en-US', {month: 'long', year: 'numeric'})}</li>`;
+      dateHtml += `<li>${(new Date(date)).toLocaleDateString('en-US', {month: 'long', year: 'numeric', timeZone: 'UTC'})}</li>`;
     });
     datesElement.innerHTML = dateHtml;
   };

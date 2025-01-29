@@ -36,7 +36,7 @@ next_page: /upcoming-events
           const mostRecent = new Date(dancer.placements[0].date);
           const recency = new Date();
           recency.setDate(recency.getDate() - 30);
-          div.innerHTML += `<div class="${mostRecent >= recency ? "recent-placement" : ""}"><a href="/dancer#${dancer.id}">${dancer.name}</a> last placed ${mostRecent.toLocaleDateString()}</div>`;
+          div.innerHTML += `<div class="${mostRecent >= recency ? "recent-placement" : ""}"><a href="/dancer#${dancer.id}">${dancer.name}</a> last placed ${mostRecent.toLocaleDateString(undefined, {timeZone: 'UTC', month: 'long', year: 'numeric'})}</div>`;
         })
       });
 
