@@ -130,6 +130,9 @@ previous_page: /dancers
 
     competableDivisionsHtml = "<tr><th>Role</th><th>Division</th></tr>";
     for (let role in dancer.divisions) {
+      if (!dancer.divisions[role] == null || dancer.divisions[role].length < 1) {
+        continue;
+      }
       competableDivisionsHtml += `
           <tr>
             <td>${role}</td>
