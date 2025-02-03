@@ -368,7 +368,8 @@ def addEvents(_events, new_events):
 
 new_dancers_by_date = {}
 
-def getCompetableDivisions(role_id, placements):
+def getCompetableDivisions(role_id, placements, primary_role_competable_divisons = None):
+  is_primary_role = primary_role_competable_divisons is None
   points_per_division = {}
   for placement in placements:
     if placement["role"] != role_id:
@@ -414,6 +415,17 @@ def getCompetableDivisions(role_id, placements):
     competableDivisions.append(NOVICE)
     competableDivisions.append(NEWCOMER)
 
+  # Filter competable divions for secondary role
+  ## This is done in a "practical" way, in that if they are a champion in their primary role and never competed
+  ## in their secondary role, they technically can compete in advanced, but we really doubt that they actually will.
+  if not is_primary_role:
+    if NOVICE not in competableDivisions:
+      competableDivisions = [c for c in competableDivisions if c != NEWCOMER]
+    if NOVICE not in competableDivisions and INTERMEDIATE not in competableDivisions and ADVANCED not in competableDivisions:
+      competableDivisions = [c for c in competableDivisions if c != NOVICE]
+    if INTERMEDIATE not in competableDivisions and ADVANCED not in competableDivisions and ALLSTARS not in competableDivisions:
+      competableDivisions = [c for c in competableDivisions if c != INTERMEDIATE]
+
   return competableDivisions
 
 def addEarliestPlacement(dateOne: datetime.datetime|None, dateTwo: datetime.datetime|None):
@@ -437,16 +449,24 @@ for raw_response_dancer_wsdc_id in raw_response_dancers:
     addEarliestPlacement(leader[2], follower[2])
     dancer_placements = leader[0] + follower[0]
     dancer_placements.sort(key=lambda p: p["date"], reverse=True)
+
+    primary_role_id = ROLES_MAP_INVERTED[datum["short_dominate_role"]]
+    competable_roles = [LEADER, FOLLOWER]
+    primary_role_competable_divisons = getCompetableDivisions(primary_role_id, dancer_placements)
+    competable_roles = [r for r in competable_roles if r != primary_role_id]
+    divisions = {
+      primary_role_id: primary_role_competable_divisons
+    }
+    for cr in competable_roles:
+      divisions[cr] = getCompetableDivisions(cr, dancer_placements, primary_role_competable_divisons)
+
     res = {
       'id': datum['dancer_wsdcid'],
       # 'pro': datum["is_pro"] == 1,
-      'primary_role': ROLES_MAP_INVERTED[datum["short_dominate_role"]],
+      'primary_role': primary_role_id,
       'name': "{} {}".format(datum["dancer_first"], datum["dancer_last"]),
       'placements': dancer_placements,
-      'divisions': {
-        LEADER: getCompetableDivisions(LEADER, dancer_placements),
-        FOLLOWER: getCompetableDivisions(FOLLOWER, dancer_placements),
-      },
+      'divisions': divisions,
     }
     if len(res['placements']) > 0:
         database["dancers"].append(res)
