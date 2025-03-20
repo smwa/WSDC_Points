@@ -301,7 +301,11 @@ def placementsToList(placements, raw_dancer):
             division_name = division["division"]["name"].title()
             division_id = DIVISIONS_MAP_INVERTED[division_name]
             for competition in division["competitions"]:
-                competition_date = datetime.datetime.strptime(competition["event"]["date"], '%B %Y')
+                competition_date = None
+                try:
+                    competition_date = datetime.datetime.strptime(competition["event"]["date"], '%B %Y')
+                except:
+                    competition_date = datetime.datetime.strptime("January 1970", '%B %Y')
                 if earliest_event is None or competition_date < earliest_event:
                    earliest_event = competition_date
                 points = competition["points"]
