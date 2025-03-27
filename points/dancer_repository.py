@@ -4,9 +4,9 @@ import datetime
 from dateutil.relativedelta import relativedelta
 import gzip
 
-COMPETITION_RECENCY_LIMIT_IN_MONTHS = 1
+COMPETITION_RECENCY_LIMIT_IN_MONTHS = 15
 API_URL = "https://points.worldsdc.com/lookup2020/find"
-NONE_SLIDE_LIMIT = 2
+NONE_SLIDE_LIMIT = 200
 RAW_RESPONSE_FILE = './raw_responses.json.gz'
 LIMIT_TO_DANCE_STYLE = 'West Coast Swing'
 
