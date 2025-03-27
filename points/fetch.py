@@ -8,6 +8,8 @@ import msgpack
 import gzip
 from os import environ
 import time
+from event_repository import get_events
+from dancer_repository import get_dancers
 
 FULL_DANCER_CHECK = False
 if "FULLDANCERCHECK" in environ:
@@ -15,18 +17,13 @@ if "FULLDANCERCHECK" in environ:
 SKIP_FETCH = False
 if "SKIPFETCH" in environ:
   SKIP_FETCH = True
-COMPETITION_RECENCY_LIMIT_IN_MONTHS = 15
+
 CHUNKED_DANCERS_SIZE = 20
 
-LOCATION_CACHE_FILE = "./locations.json"
 OPEN_WEATHER_MAP_API_KEY = ""
 if "OPEN_WEATHER_MAP_API_KEY" in environ:
   OPEN_WEATHER_MAP_API_KEY = environ["OPEN_WEATHER_MAP_API_KEY"]
 
-API_URL = "https://points.worldsdc.com/lookup2020/find"
-NONE_SLIDE_LIMIT = 200
-RAW_RESPONSE_FILE = './raw_responses.json.gz'
-RAW_EVENTS_RESPONSE_FILE = './raw_events.html.gz'
 LIMIT_TO_DANCE_STYLE = 'West Coast Swing'
 ROLES_MAP = {
     1: 'Leader',
@@ -85,253 +82,8 @@ NEWCOMER = DIVISIONS_MAP_INVERTED['Newcomer']
 MASTERS = DIVISIONS_MAP_INVERTED['Masters']
 JUNIORS = DIVISIONS_MAP_INVERTED['Juniors']
 
-
-# Why do you do this to us, WSDC?
-LOCATION_PATCHES = {
-   "Swing Fling": "Washington, D.C., US"
-}
-
-number_of_requests_to_wsdc = 0
-
-def get_dancer(wsdc_id: str):
-  r = requests.post(API_URL, data = {'num': wsdc_id})
-  if r.status_code != 200:
-    print("Bad status code: {}".format(r.status_code))
-    return None
-  json = r.json()
-  if not json:
-    print("Received no json but no 404")
-    return None
-  return json
-
-# Load raw responses from a json file
-raw_response_dancers = {} # Keyed by str(wsdc_id)
-with open(RAW_RESPONSE_FILE, "rb") as f:
-  raw_response_dancers_json = gzip.decompress(f.read()).decode('utf-8')
-  raw_response_dancers = json.loads(raw_response_dancers_json)
-
-location_cache = {}
-with open(LOCATION_CACHE_FILE, "r") as f:
-  location_cache = json.load(f)
-
-def get_location(name: str, location: str):
-  if (location == "" or location is None) and name not in LOCATION_PATCHES:
-     print("Location patch miss for '{}'".format(name))
-  if (location == "" or location is None) and name in LOCATION_PATCHES:
-     location = LOCATION_PATCHES[name]
-  if location in location_cache:
-     return location_cache[location]
-  if SKIP_FETCH:
-    return []
-  time.sleep(1.1)
-  splits = [s.strip() for s in location.split(",")]
-  if len(splits) > 1 and len(splits[1]) == 2 and splits[1].isupper() and splits[1] != "UK":
-    if len(splits) < 3:
-      splits.append("US")
-    else:
-      splits[2] = "US"
-  requestable_location = ",".join(splits)
-  url = "http://api.openweathermap.org/geo/1.0/direct?q={}&limit=1&appid={}".format(requestable_location, OPEN_WEATHER_MAP_API_KEY)
-  r = requests.get(url)
-  if not r.ok:
-    print("No results for location {}".format(location))
-    location_cache[location] = []
-    return []
-  jsonResult = r.json()
-  if len(jsonResult) < 1:
-    print("No results for location {}".format(location))
-    location_cache[location] = []
-    return []
-  ret = None
-  latitude = jsonResult[0]["lat"]
-  longitude = jsonResult[0]["lon"]
-  ret = (latitude, longitude)
-  location_cache[location] = ret
-  return ret
-
-def fetch_and_save_dancer(wsdc_id):
-  res = get_dancer("{}".format(wsdc_id))
-  if res is None:
-    print("Empty result on {}".format(wsdc_id))
-    return False
-  else:
-    raw_response_dancers[str(wsdc_id)] = res
-    return True
-
-def get_all_dancers(starting_wsdc_id=1):
-    requests_made = 0
-    current_wsdc_id = starting_wsdc_id
-    none_slide = 0
-
-    while True:
-      if current_wsdc_id % 500 == 0:
-        print("Getting", current_wsdc_id)
-      success = fetch_and_save_dancer(current_wsdc_id)
-      requests_made += 1
-      if success:
-        none_slide = 0
-      else:
-        none_slide += 1
-        if none_slide >= NONE_SLIDE_LIMIT:
-          print("Quitting")
-          break
-      current_wsdc_id += 1
-    return requests_made
-
-def get_max_placement_date(dancer_role):
-  placements = dancer_role['placements']
-  if placements is None or type(placements) is list:
-    return None
-  max_placement_date = None
-  for style_key in placements: # style_key is "West Coast Swing"
-    if style_key != LIMIT_TO_DANCE_STYLE:
-      continue
-    style = placements[style_key] # style is {"NOV": {"division": {id: 3, name: newcomer, abbreviation: NEW}}}
-    for division_key in style:
-      division = style[division_key]
-      for competition in division["competitions"]:
-        competition_date = None
-        try:
-            competition_date = datetime.datetime.strptime(competition["event"]["date"], '%B %Y')
-        except:
-            competition_date = datetime.datetime.strptime("January 1970", '%B %Y')
-        if max_placement_date is None:
-          max_placement_date = competition_date
-        else:
-          max_placement_date = max(max_placement_date, competition_date)
-  return max_placement_date
-
-def get_dancers_abbreviated():
-  requests_made = 0
-  max_wsdc_id = 1
-  cutoff_date = datetime.datetime.now() - relativedelta(months=COMPETITION_RECENCY_LIMIT_IN_MONTHS)
-  for wsdc_id in raw_response_dancers:
-    dancer = raw_response_dancers[wsdc_id]
-    max_wsdc_id = max(max_wsdc_id, dancer['dancer_wsdcid'])
-    max_date = get_max_placement_date(dancer['leader'])
-    max_follower_date = get_max_placement_date(dancer['follower'])
-    if max_date is None or (max_follower_date is not None and max_follower_date > max_date):
-      max_date = max_follower_date
-    if max_date is not None and max_date > cutoff_date:
-      fetch_and_save_dancer(dancer['dancer_wsdcid'])
-      requests_made += 1
-  return requests_made + get_all_dancers(max_wsdc_id + 1)
-
-def parseEventsFromWsdcEventsPageHtml(html):
-  soup = BeautifulSoup(html, 'html.parser')
-  rows = soup.find("table").find_all("tr")[1:]
-  ret = []
-  for row in rows:
-    tds = row.find_all('td')
-    date = tds[0].get_text()
-    location = tds[2].get_text()
-    name = tds[1].find("div", class_="event_name").get_text().strip()
-    url = tds[1].find("a")['href']
-    event_type = tds[1].find("div", class_="event_type").get_text()
-
-    start_date = None
-    end_date = None
-
-    try:
-      year = re.findall('\d{4}', date)[0]
-      month = re.findall('[a-zA-Z]{3}', date)[0]
-      day = re.findall('\d{1,2}', date)[0]
-      month = datetime.datetime.strptime(month, '%b').month
-      start_date = datetime.datetime(int(year), month, int(day)).isoformat()
-
-      year = re.findall('\d{4}', date)[-1]
-      month = re.findall('[a-zA-Z]{3}', date)[-1]
-      day = re.findall('\s(\d{1,2})[,\s]', date)[-1]
-      month = datetime.datetime.strptime(month, '%b').month
-      end_date = datetime.datetime(int(year), month, int(day)).isoformat()
-    except Exception as e:
-      raise e
-    latlon = get_location(name, location)
-    latitude = None
-    longitude = None
-    if len(latlon) >= 2:
-      latitude = latlon[0]
-      longitude = latlon[1]
-    ret.append({
-      "name": name,
-      "location": location,
-      "latitude": latitude,
-      "longitude": longitude,
-      "url": url,
-      "type": event_type,
-      "end_date": end_date,
-      "start_date": start_date
-    })
-  return ret
-
-eventsFromWsdc = []
-
-if not SKIP_FETCH:
-  if FULL_DANCER_CHECK:
-    number_of_requests_to_wsdc = get_all_dancers(1)
-  else:
-    number_of_requests_to_wsdc = get_dancers_abbreviated()
-  eventsPageResponse = requests.get("https://www.worldsdc.com/events/")
-  number_of_requests_to_wsdc += 1
-  if eventsPageResponse.status_code == 200:
-    with open(RAW_EVENTS_RESPONSE_FILE, 'wb') as f:
-      raw_events_html_compressed = gzip.compress(bytes(eventsPageResponse.text, 'utf-8'))
-      f.write(raw_events_html_compressed)
-
-with open(RAW_EVENTS_RESPONSE_FILE, "rb") as f:
-  raw_events_html = gzip.decompress(f.read()).decode('utf-8')
-  eventsFromWsdc = parseEventsFromWsdcEventsPageHtml(raw_events_html)
-
-print("Made {} requests to WSDC".format(number_of_requests_to_wsdc))
-
-raw_response_dancers = dict(sorted(raw_response_dancers.items()))
-with open(RAW_RESPONSE_FILE, 'wb') as f:
-  raw_response_dancers_json = json.dumps(raw_response_dancers)
-  raw_response_dancers_json_compressed = gzip.compress(bytes(raw_response_dancers_json, 'utf-8'))
-  f.write(raw_response_dancers_json_compressed)
-
-def placementsToList(placements, raw_dancer):
-    final_placements = []
-    final_events = []
-    earliest_event = None
-    if type(placements) is list:
-        return (final_placements, final_events, earliest_event)
-    for style_key in placements: # style_key is "West Coast Swing"
-        if style_key != LIMIT_TO_DANCE_STYLE:
-          continue
-        style = placements[style_key] # style is {"NOV": {"division": {id: 3, name: newcomer, abbreviation: NEW}}}
-        for division_key in style:
-            division = style[division_key]
-            division_name = division["division"]["name"].title()
-            division_id = DIVISIONS_MAP_INVERTED[division_name]
-            for competition in division["competitions"]:
-                competition_date = None
-                try:
-                    competition_date = datetime.datetime.strptime(competition["event"]["date"], '%B %Y')
-                except:
-                    competition_date = datetime.datetime.strptime("January 1970", '%B %Y')
-                if earliest_event is None or competition_date < earliest_event:
-                   earliest_event = competition_date
-                points = competition["points"]
-                if points is None:
-                   print("Found 'None' in points for dancer {}".format(dancer["dancer_wsdcid"]))
-                   points = 0
-                event = {
-                    **competition["event"],
-                    "date": competition_date.date().isoformat()
-                }
-                final_events.append(event)
-                role = competition["role"].title()
-                role = ROLES_MAP_INVERTED[role]
-                final_placements.append({
-                    "role": role,
-                    "result": competition["result"],
-                    "points": points,
-                    "event": event['id'],
-                    "date": event["date"],
-                    "division": division_id,
-                })
-    return (final_placements, final_events, earliest_event)
+eventsFromWsdc = get_events(not SKIP_FETCH, OPEN_WEATHER_MAP_API_KEY)
+raw_response_dancers = get_dancers(not SKIP_FETCH, FULL_DANCER_CHECK)
 
 database = {
     "last_updated": datetime.datetime.now().isoformat(),
@@ -449,6 +201,49 @@ def addEarliestPlacement(dateOne: datetime.datetime|None, dateTwo: datetime.date
   if date_string not in new_dancers_by_date:
     new_dancers_by_date[date_string] = 0
   new_dancers_by_date[date_string] += 1
+
+def placementsToList(placements, raw_dancer):
+    final_placements = []
+    final_events = []
+    earliest_event = None
+    if type(placements) is list:
+        return (final_placements, final_events, earliest_event)
+    for style_key in placements: # style_key is "West Coast Swing"
+        if style_key != LIMIT_TO_DANCE_STYLE:
+          continue
+        style = placements[style_key] # style is {"NOV": {"division": {id: 3, name: newcomer, abbreviation: NEW}}}
+        for division_key in style:
+            division = style[division_key]
+            division_name = division["division"]["name"].title()
+            division_id = DIVISIONS_MAP_INVERTED[division_name]
+            for competition in division["competitions"]:
+                competition_date = None
+                try:
+                    competition_date = datetime.datetime.strptime(competition["event"]["date"], '%B %Y')
+                except:
+                    competition_date = datetime.datetime.strptime("January 1970", '%B %Y')
+                if earliest_event is None or competition_date < earliest_event:
+                   earliest_event = competition_date
+                points = competition["points"]
+                if points is None:
+                   print("Found 'None' in points for dancer {}".format(dancer["dancer_wsdcid"]))
+                   points = 0
+                event = {
+                    **competition["event"],
+                    "date": competition_date.date().isoformat()
+                }
+                final_events.append(event)
+                role = competition["role"].title()
+                role = ROLES_MAP_INVERTED[role]
+                final_placements.append({
+                    "role": role,
+                    "result": competition["result"],
+                    "points": points,
+                    "event": event['id'],
+                    "date": event["date"],
+                    "division": division_id,
+                })
+    return (final_placements, final_events, earliest_event)
 
 for raw_response_dancer_wsdc_id in raw_response_dancers:
     datum = raw_response_dancers[raw_response_dancer_wsdc_id]
@@ -585,10 +380,6 @@ for i in range(0, len(divisions_plus_top) - 1):
 
 database["dancers_count"] = len(database["dancers"])
 database["events_count"] = len(database["events"])
-
-# Write out locations
-with open(LOCATION_CACHE_FILE, 'w') as f:
-  json.dump(location_cache, f)
 
 # Write to file, leave at bottom of this script
 with open("../assets/database.txt", 'bw') as f:
