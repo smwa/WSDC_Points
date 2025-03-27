@@ -190,7 +190,11 @@ def get_max_placement_date(dancer_role):
     for division_key in style:
       division = style[division_key]
       for competition in division["competitions"]:
-        competition_date = datetime.datetime.strptime(competition["event"]["date"], '%B %Y')
+        competition_date = None
+        try:
+            competition_date = datetime.datetime.strptime(competition["event"]["date"], '%B %Y')
+        except:
+            competition_date = datetime.datetime.strptime("January 1970", '%B %Y')
         if max_placement_date is None:
           max_placement_date = competition_date
         else:
