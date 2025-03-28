@@ -87,7 +87,9 @@ def get_dancers_abbreviated(raw_response_dancers):
     if max_date is not None and max_date > cutoff_date:
       (_, raw_response_dancers) = fetch_and_save_dancer(dancer['dancer_wsdcid'], raw_response_dancers)
       requests_made += 1
-  return (requests_made + get_all_dancers(max_wsdc_id + 1), raw_response_dancers)
+  next_wsdc_id = max_wsdc_id + 1
+  requests_made += get_all_dancers(next_wsdc_id, raw_response_dancers)
+  return (requests_made, raw_response_dancers)
 
 def get_dancers(fetch_remote: bool, fetch_all):
   # Load raw responses from a json file
