@@ -88,7 +88,8 @@ def get_dancers_abbreviated(raw_response_dancers):
       (_, raw_response_dancers) = fetch_and_save_dancer(dancer['dancer_wsdcid'], raw_response_dancers)
       requests_made += 1
   next_wsdc_id = max_wsdc_id + 1
-  requests_made += get_all_dancers(next_wsdc_id, raw_response_dancers)
+  (requests_made_during_get_all_dancers, raw_response_dancers) = get_all_dancers(next_wsdc_id, raw_response_dancers)
+  requests_made += requests_made_during_get_all_dancers
   return (requests_made, raw_response_dancers)
 
 def get_dancers(fetch_remote: bool, fetch_all):
