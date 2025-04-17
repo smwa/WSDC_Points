@@ -15,9 +15,9 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Setup Python
-        uses: actions/setup-python@v2.3.1
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: '3.13'
           cache: 'pip'
           cache-dependency-path: '**/points/requirements.txt'
           architecture: 'x64'
