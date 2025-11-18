@@ -1,3 +1,3 @@
 #!/bin/env bash
-bundle install
-JEKYLL_ENV=development bundle exec jekyll serve -w --force_polling --incremental
+bundle3.3 install
+JEKYLL_ENV=development bundle3.3 exec jekyll serve -w --force_polling --incremental

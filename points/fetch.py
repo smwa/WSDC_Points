@@ -82,6 +82,8 @@ NEWCOMER = DIVISIONS_MAP_INVERTED['Newcomer']
 MASTERS = DIVISIONS_MAP_INVERTED['Masters']
 JUNIORS = DIVISIONS_MAP_INVERTED['Juniors']
 
+rule_change_date = datetime.datetime.strptime("January 2020", '%B %Y')
+first_place_points_dict = {}
 eventsFromWsdc = get_events(not SKIP_FETCH, OPEN_WEATHER_MAP_API_KEY)
 raw_response_dancers = get_dancers(not SKIP_FETCH, FULL_DANCER_CHECK)
 
@@ -243,6 +245,16 @@ def placementsToList(placements, raw_dancer):
                     "date": event["date"],
                     "division": division_id,
                 })
+
+                if competition["result"] == "1" and datetime.datetime.fromisoformat(event["date"]) >= rule_change_date:
+                  if event["id"] not in first_place_points_dict:
+                    first_place_points_dict[event["id"]] = {}
+                  if event["date"] not in first_place_points_dict[event["id"]]:
+                    first_place_points_dict[event["id"]][event["date"]] = {}
+                  if division_id not in first_place_points_dict[event["id"]][event["date"]]:
+                    first_place_points_dict[event["id"]][event["date"]][division_id] = {}
+                  first_place_points_dict[event["id"]][event["date"]][division_id][role] = points
+                  
     return (final_placements, final_events, earliest_event)
 
 for raw_response_dancer_wsdc_id in raw_response_dancers:
@@ -277,6 +289,44 @@ for raw_response_dancer_wsdc_id in raw_response_dancers:
         database["events"] = addEvents(database["events"], follower[1])
 
 database["events"].sort(key=lambda kv: kv["id"], reverse=True)
+
+# Add tier info to events
+def get_tier(event_object, date_string, division_key, role_key):
+  first_place_points = None
+
+  if event_object["id"] in first_place_points_dict and date_string in first_place_points_dict[event_object["id"]] and division_key in first_place_points_dict[event_object["id"]][date_string] and role_key in first_place_points_dict[event_object["id"]][date_string][division_key]:
+    first_place_points = first_place_points_dict[event_object["id"]][date_string][division_key][role_key]
+
+  if first_place_points is None:
+    return None
+  if first_place_points == 3:
+    return "Tier 1, 5 - 10 competitors"
+  if first_place_points == 6:
+    return "Tier 2, 11 - 19 competitors"
+  if first_place_points == 10:
+    return "Tier 3, 20 - 39 competitors"
+  if first_place_points == 15:
+    return "Tier 4, 40 - 79 competitors"
+  if first_place_points == 20:
+    return "Tier 5, 80 - 129 competitors"
+  if first_place_points == 25:
+    return "Tier 6, 130+ competitors"
+  print("Invalid number of points: {} {} {} {} {}".format(first_place_points, event_object["id"], date_string, division_key, role_key))
+  return None
+
+for event in database["events"]:
+  event["dates"] = [{"date": d, "divisions": {}} for d in event["dates"]]
+  for date_object in event["dates"]:
+    for division_key in DIVISIONS_MAP:
+      division = DIVISIONS_MAP[division_key]
+      for role_key in ROLES_MAP:
+        role = ROLES_MAP[role_key]
+        tier = get_tier(event, date_object["date"], division_key, role_key)
+        if tier is not None:
+          if division not in date_object["divisions"]:
+            date_object["divisions"][division] = {}
+          date_object["divisions"][division][role] = tier
+
 
 # Get how many new dancers by month
 new_dancers_over_time = [{'key': k, 'value': new_dancers_by_date[k]} for k in new_dancers_by_date.keys()]

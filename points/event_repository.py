@@ -8,7 +8,8 @@ import time
 
 # Why do you do this to us, WSDC?
 LOCATION_PATCHES = {
-   "Swing Fling": "Washington, D.C., US"
+   "Swing Fling": "Washington, D.C., US",
+   "Monterey Swing Fest": "Monterey, CA"
 }
 
 LOCATION_CACHE_FILE = "./locations.json"

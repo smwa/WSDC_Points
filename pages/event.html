@@ -16,9 +16,9 @@ previous_page: /events
 
 <script>
   const main = async () => {
-    const db = await getEventsDatabase();
+    const eventsdb = await getEventsDatabase();
     const event_id = parseInt(window.location.hash.substring(1), 10);
-    const event = db.events.find((e) => e.id === event_id);
+    const event = eventsdb.events.find((e) => e.id === event_id);
 
     document.getElementById("data-event-name").innerText = event.name;
     document.getElementById("data-event-location").innerText = event.location;
@@ -27,8 +27,13 @@ previous_page: /events
     urlElement.innerText = event.url;
     const datesElement = document.getElementById("data-event-dates");
     let dateHtml = "";
-    event.dates.forEach((date) => {
-      dateHtml += `<li>${(new Date(date)).toLocaleDateString('en-US', {month: 'long', year: 'numeric', timeZone: 'UTC'})}</li>`;
+    event.dates.forEach((dateObject) => {
+      const tiers = Object.entries(dateObject.divisions).map(([division_key, roles]) =>
+        Object.entries(roles).map(([role_key, tier]) =>
+          `${division_key} ${role_key} - ${tier}`
+        ).join("<hr>")
+      ).join("<hr>");
+      dateHtml += `<li><details><summary>${(new Date(dateObject.date)).toLocaleDateString('en-US', {month: 'long', year: 'numeric', timeZone: 'UTC'})}</summary>${tiers}</details></li>`;
     });
     datesElement.innerHTML = dateHtml;
   };
