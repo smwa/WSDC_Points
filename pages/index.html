@@ -37,7 +37,7 @@ next_page: /upcoming-events
     Promise.all(favoriteDancers.map(dancer_id => getDancer(dancer_id)))
       .then(dancers => {
         const minDate = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000); // 90 days in the past
-        dancers = dancers.filter(x => (new Date(b.placements[0].date)) >= minDate);
+        dancers = dancers.filter(x => (new Date(x.placements[0].date)) >= minDate);
         dancers.sort(function(a, b) { return (new Date(b.placements[0].date)) - (new Date(a.placements[0].date)); });
         dancers.forEach(dancer => {
           const mostRecent = new Date(dancer.placements[0].date);
