@@ -177,16 +177,22 @@ def getCompetableDivisions(role_id, placements, primary_role_competable_divisons
     competableDivisions.append(NOVICE)
     competableDivisions.append(NEWCOMER)
 
-  # Filter competable divions for secondary role
+  # Filter competable divisons for secondary role
   ## This is done in a "practical" way, in that if they are a champion in their primary role and never competed
   ## in their secondary role, they technically can compete in advanced, but we really doubt that they actually will.
   if not is_primary_role:
-    if NOVICE not in primary_role_competable_divisons:
+    # These go into effect January 1, 2026
+    if (INTERMEDIATE in primary_role_competable_divisons and NOVICE in competableDivisions) or ADVANCED in primary_role_competable_divisons or ALLSTARS in competableDivisions or CHAMPIONS in competableDivisions:
       competableDivisions = [c for c in competableDivisions if c != NEWCOMER]
-    if NOVICE not in primary_role_competable_divisons and INTERMEDIATE not in primary_role_competable_divisons and ADVANCED not in primary_role_competable_divisons:
+    
+    if (ADVANCED in primary_role_competable_divisons and INTERMEDIATE in competableDivisions) or ALLSTARS in competableDivisions or CHAMPIONS in competableDivisions:
       competableDivisions = [c for c in competableDivisions if c != NOVICE]
-    if INTERMEDIATE not in primary_role_competable_divisons and ADVANCED not in primary_role_competable_divisons and ALLSTARS not in primary_role_competable_divisons:
+    
+    if (ALLSTARS in primary_role_competable_divisons and ADVANCED in competableDivisions) or CHAMPIONS in competableDivisions:
       competableDivisions = [c for c in competableDivisions if c != INTERMEDIATE]
+    
+    if (CHAMPIONS in primary_role_competable_divisons and ALLSTARS in competableDivisions):
+      competableDivisions = [c for c in competableDivisions if c != ADVANCED]
 
   return competableDivisions
 
