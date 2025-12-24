@@ -33,19 +33,21 @@ ROLES_MAP = {
 DIVISIONS_MAP = {
     12: 'Teacher',
     11: 'Invitational',
-    10: 'Sophisticated',
-    9: 'Professional',
     8: 'Champions',
     7: 'All-Stars',
     6: 'Advanced',
     5: 'Intermediate',
     4: 'Novice',
     3: 'Newcomer',
+    10: 'Sophisticated',
+    9: 'Professional',
     2: 'Masters',
     1: 'Juniors',
 }
 ROLES_MAP_INVERTED = dict((v, k) for k, v in ROLES_MAP.items())
 DIVISIONS_MAP_INVERTED = dict((v, k) for k, v in DIVISIONS_MAP.items())
+
+DIVISIONS_IN_SORT_ORDER = list(DIVISIONS_MAP)
 
 SKILL_DIVISION_PROGRESSION = [DIVISIONS_MAP_INVERTED[d] for d in [
   'Newcomer',
@@ -56,13 +58,15 @@ SKILL_DIVISION_PROGRESSION = [DIVISIONS_MAP_INVERTED[d] for d in [
   'Champions',
 ]]
 
-SKILL_DIVISION_LIMITS = {DIVISIONS_MAP_INVERTED[d[0]]:(d[1], d[2]) for d in [
-  ('Champions', 1, 10),
-  ('All-Stars', 150, 225),
-  ('Advanced', 60, 90),
-  ('Intermediate', 30, 45),
-  ('Novice', 16, 30),
-  ('Newcomer', 0, 1),
+# Except champions: can move out, must move out, can't move back down after
+# Champions: can dance if you have 1 champion point, can't move back down after, and can't move back down after
+SKILL_DIVISION_LIMITS = {DIVISIONS_MAP_INVERTED[d[0]]:(d[1], d[2], d[3]) for d in [
+  ('Champions', 1, 10, 10),
+  ('All-Stars', 150, 225, 1),
+  ('Advanced', 60, 90, 1),
+  ('Intermediate', 30, 45, 1),
+  ('Novice', 16, 30, 1),
+  ('Newcomer', 0, 1, 1),
 ]}
 
 LEADER = ROLES_MAP_INVERTED["Leader"]
@@ -130,8 +134,52 @@ def addEvents(_events, new_events):
 
 new_dancers_by_date = {}
 
+def getSecondaryRoleCompetableDivisions(role_id, placements, primary_role_competable_divisons):
+  points_per_division = {}
+  for division in SKILL_DIVISION_PROGRESSION:
+    points_per_division[division] = 0
+  for placement in placements:
+    if placement["role"] != role_id:
+      continue
+    if placement["division"] not in points_per_division:
+      points_per_division[placement["division"]] = 0
+    points_per_division[placement["division"]] += placement["points"]
+  competableDivisions = []
+
+  highest_primary_role_division = primary_role_competable_divisons[0]
+  for division in SKILL_DIVISION_PROGRESSION:
+    if division in primary_role_competable_divisons:
+      highest_primary_role_division = division
+  
+  division_index = SKILL_DIVISION_PROGRESSION.index(highest_primary_role_division)
+  two_down = None
+  one_down = None
+  zero_down = highest_primary_role_division
+  if (division_index - 2) >= 0:
+    two_down = SKILL_DIVISION_PROGRESSION[division_index - 2]
+  if (division_index - 1) >= 0:
+    one_down = SKILL_DIVISION_PROGRESSION[division_index - 1]
+
+  # zero down
+  if points_per_division[zero_down] >= SKILL_DIVISION_LIMITS[zero_down][2] or one_down is None or points_per_division[one_down] >= SKILL_DIVISION_LIMITS[one_down][1]:
+    competableDivisions.append(zero_down)
+
+  # one down
+  if points_per_division[zero_down] < SKILL_DIVISION_LIMITS[zero_down][2]:
+    if one_down is not None and points_per_division[one_down] < SKILL_DIVISION_LIMITS[one_down][1]:
+      competableDivisions.append(one_down)
+
+  # two down
+  if (points_per_division[one_down] < SKILL_DIVISION_LIMITS[one_down][2]) and (points_per_division[zero_down] < SKILL_DIVISION_LIMITS[zero_down][2]):
+    if two_down is not None and points_per_division[two_down] < SKILL_DIVISION_LIMITS[two_down][0]:
+      competableDivisions.append(two_down)
+
+  return competableDivisions
+
 def getCompetableDivisions(role_id, placements, primary_role_competable_divisons = None):
   is_primary_role = primary_role_competable_divisons is None
+  if not is_primary_role:
+    return getSecondaryRoleCompetableDivisions(role_id, placements, primary_role_competable_divisons)
   points_per_division = {}
   for placement in placements:
     if placement["role"] != role_id:
@@ -176,23 +224,6 @@ def getCompetableDivisions(role_id, placements, primary_role_competable_divisons
   else:
     competableDivisions.append(NOVICE)
     competableDivisions.append(NEWCOMER)
-
-  # Filter competable divisons for secondary role
-  ## This is done in a "practical" way, in that if they are a champion in their primary role and never competed
-  ## in their secondary role, they technically can compete in advanced, but we really doubt that they actually will.
-  if not is_primary_role:
-    # These go into effect January 1, 2026
-    if (INTERMEDIATE in primary_role_competable_divisons and NOVICE in competableDivisions) or ADVANCED in primary_role_competable_divisons or ALLSTARS in competableDivisions or CHAMPIONS in competableDivisions:
-      competableDivisions = [c for c in competableDivisions if c != NEWCOMER]
-    
-    if (ADVANCED in primary_role_competable_divisons and INTERMEDIATE in competableDivisions) or ALLSTARS in competableDivisions or CHAMPIONS in competableDivisions:
-      competableDivisions = [c for c in competableDivisions if c != NOVICE]
-    
-    if (ALLSTARS in primary_role_competable_divisons and ADVANCED in competableDivisions) or CHAMPIONS in competableDivisions:
-      competableDivisions = [c for c in competableDivisions if c != INTERMEDIATE]
-    
-    if (CHAMPIONS in primary_role_competable_divisons and ALLSTARS in competableDivisions):
-      competableDivisions = [c for c in competableDivisions if c != ADVANCED]
 
   return competableDivisions
 
@@ -269,7 +300,7 @@ for raw_response_dancer_wsdc_id in raw_response_dancers:
     follower = placementsToList(datum["follower"]["placements"], datum)
     addEarliestPlacement(leader[2], follower[2])
     dancer_placements = leader[0] + follower[0]
-    dancer_placements.sort(key=lambda p: p["date"], reverse=True)
+    dancer_placements.sort(key=lambda p: DIVISIONS_IN_SORT_ORDER.index(p["division"]), reverse=False)
 
     primary_role_id = ROLES_MAP_INVERTED[datum["short_dominate_role"]]
     competable_roles = [LEADER, FOLLOWER]
@@ -341,7 +372,7 @@ for kv in new_dancers_over_time:
   kv['key'] = "{:'%y}".format(datetime.date.fromisoformat(kv['key']))
 database['new_dancers_over_time'] = new_dancers_over_time
 
-# Find "rising stars", top 5 for each role/division by points received in the last 3 months
+# Find "up and coming dancers", top 5 for each role/division by points received in the last 3 months
 
 min_date = (datetime.date.today().replace(day=1) - datetime.timedelta(days=90)).replace(day=1) # 3 months ago
 from_each_group = 5
