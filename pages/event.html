@@ -30,11 +30,14 @@ previous_page: /events
     const datesElement = document.getElementById("data-event-dates");
     let dateHtml = "";
     event.dates.forEach((dateObject) => {
-      const tiers = Object.entries(dateObject.divisions).map(([division_key, roles]) =>
+      let tiers = Object.entries(dateObject.divisions).map(([division_key, roles]) =>
         Object.entries(roles).map(([role_key, tier]) =>
           `${division_key} ${role_key} - ${tier}`
         ).join("<hr>")
       ).join("<hr>");
+      if (tiers == "") {
+        tiers = "Tiers are not known for this date";
+      }
       dateHtml += `<li><details><summary>${(new Date(dateObject.date)).toLocaleDateString('en-US', {month: 'long', year: 'numeric', timeZone: 'UTC'})} - <a href="event-competitors#${event_id}:${dateObject.date}">Competitors</a></summary>${tiers}</details></li>`;
     });
     datesElement.innerHTML = dateHtml;

@@ -33,18 +33,29 @@ next_page: /upcoming-events
     const favoriteDancers = getFavoriteDancers();
     if (favoriteDancers.length < 1) return;
     const div = document.querySelector('.favorite-dancers');
-    div.innerHTML = "<h3>Starred Dancers <small>Placed in the last 90 days</small></h3>";
+    div.innerHTML = "";
     Promise.all(favoriteDancers.map(dancer_id => getDancer(dancer_id)))
       .then(dancers => {
         const minDate = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000); // 90 days in the past
-        dancers = dancers.filter(x => (new Date(x.placements[0].date)) >= minDate);
-        dancers.sort(function(a, b) { return (new Date(b.placements[0].date)) - (new Date(a.placements[0].date)); });
-        dancers.forEach(dancer => {
+        const recentDancers = dancers.filter(x => (new Date(x.placements[0].date)) >= minDate);
+        recentDancers.sort(function(a, b) { return (new Date(b.placements[0].date)) - (new Date(a.placements[0].date)); });
+        if (recentDancers.length > 0) {
+          div.innerHTML += "<h3>Starred Dancers <small>Placed in the last 90 days</small></h3>";
+        }
+        recentDancers.forEach(dancer => {
           const mostRecent = new Date(dancer.placements[0].date);
           const recency = new Date();
           recency.setDate(recency.getDate() - 30);
           div.innerHTML += `<div class="${mostRecent >= recency ? "recent-placement" : ""}"><a href="/dancer#${dancer.id}">${dancer.name}</a> last placed ${mostRecent.toLocaleDateString(undefined, {timeZone: 'UTC', month: 'long', year: 'numeric'})}</div>`;
-        })
+        });
+
+        let fullListHtml = "";
+        dancers.forEach(dancer => {
+          const mostRecent = new Date(dancer.placements[0].date);
+          fullListHtml += `<li><a href="/dancer#${dancer.id}">${dancer.name}</a> last placed ${mostRecent.toLocaleDateString(undefined, {timeZone: 'UTC', month: 'long', year: 'numeric'})}</li>`;
+        });
+        div.innerHTML += `<div><details><summary>All Favorites</summary><ul>${fullListHtml}</ul></details></div>`;
+
       });
 
   };

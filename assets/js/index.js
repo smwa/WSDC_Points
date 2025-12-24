@@ -60,3 +60,14 @@ const removeFavoriteDancer = (id) => {
 const updateIcons = async () => {
   feather.replace();
 }
+
+const format_placement_result = (placement) => {
+  if (placement === '11') return '11th';
+  if (placement === '12') return '12th';
+  if (placement === '13') return '13th';
+  if (placement.substring(-1) === '1') return `${placement}st`;
+  if (placement.substring(-1) === '2') return `${placement}nd`;
+  if (placement.substring(-1) === '3') return `${placement}rd`;
+  if (parseInt(placement, 10) > 1) return `${placement}th`;
+  return placement;
+};

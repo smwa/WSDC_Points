@@ -52,7 +52,7 @@ previous_page: /events
     dancerPlacements.sort((a, b) => b[1].division + (b[1].role/10) - a[1].division - (a[1].role/10) );
 
     dancerPlacements.forEach((dancerPlacement) => {
-      cHtml += `<li><a href="/dancer#${dancerPlacement[0].id}">${db.divisions[dancerPlacement[1].division]} ${db.roles[dancerPlacement[1].role]} - ${dancerPlacement[0].name} <small>(${dancerPlacement[0].id})</small></a></li>`;
+      cHtml += `<li><a href="/dancer#${dancerPlacement[0].id}">${db.divisions[dancerPlacement[1].division]} ${db.roles[dancerPlacement[1].role]}, Placed ${format_placement_result(dancerPlacement[1].result)} - ${dancerPlacement[0].name} <small>(${dancerPlacement[0].id})</small></a></li>`;
     });
     competitorsElement.innerHTML = cHtml;
   };
