@@ -139,6 +139,10 @@ ul > * a {
     text-decoration: none;
 }
 
+details > * a {
+    text-decoration: underline;
+}
+
 td {
     text-align: center;
 }

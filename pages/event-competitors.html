@@ -1,0 +1,60 @@
+---
+permalink: /event-competitors
+layout: javascripted
+background_image: swingfling.webp
+previous_page: /events
+---
+
+<h2 id="data-event-name"></h2>
+<a target="_blank" href="#" id="data-event-url"></a>
+<div id="data-event-location"></div>
+
+<a href="#" id="data-event-back">Back To Event</a>
+
+<div>
+  <h3>Competitors</div>
+  <ul id="data-competitors"><li>Loading...</li></ul>
+</div>
+
+<script>
+  const main = async () => {
+    const eventsdb = await getEventsDatabase();
+    const hashParts = window.location.hash.substring(1).split(":");
+    const event_id = parseInt(hashParts[0], 10);
+    const event_date = hashParts[1];
+    const event = eventsdb.events.find((e) => e.id === event_id);
+
+    document.getElementById("data-event-name").innerText = event.name;
+    document.getElementById("data-event-location").innerText = event.location;
+  
+    const urlElement = document.getElementById("data-event-url");
+    urlElement.href = event.url;
+    urlElement.innerText = event.url;
+  
+    const backLink = document.getElementById("data-event-back");
+    backLink.href = `event#${event_id}`;
+  
+    const db = await getDatabase();
+    const competitorsElement = document.getElementById("data-competitors");
+
+    const dancerPlacements = [];
+
+    let cHtml = "";
+    db.dancers.forEach((dancer) => {
+      dancer.placements.forEach(placement => {
+        if (placement.event != event_id || placement.date != event_date) {
+          return;
+        }
+        dancerPlacements.push([dancer, placement]);
+      });
+    });
+
+    dancerPlacements.sort((a, b) => b[1].division + (b[1].role/10) - a[1].division - (a[1].role/10) );
+
+    dancerPlacements.forEach((dancerPlacement) => {
+      cHtml += `<li><a href="/dancer#${dancerPlacement[0].id}">${db.divisions[dancerPlacement[1].division]} ${db.roles[dancerPlacement[1].role]} - ${dancerPlacement[0].name} <small>(${dancerPlacement[0].id})</small></a></li>`;
+    });
+    competitorsElement.innerHTML = cHtml;
+  };
+  main();
+</script>
