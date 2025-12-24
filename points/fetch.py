@@ -300,7 +300,7 @@ for raw_response_dancer_wsdc_id in raw_response_dancers:
     follower = placementsToList(datum["follower"]["placements"], datum)
     addEarliestPlacement(leader[2], follower[2])
     dancer_placements = leader[0] + follower[0]
-    dancer_placements.sort(key=lambda p: DIVISIONS_IN_SORT_ORDER.index(p["division"]), reverse=False)
+    dancer_placements.sort(key=lambda p: p["date"], reverse=True)
 
     primary_role_id = ROLES_MAP_INVERTED[datum["short_dominate_role"]]
     competable_roles = [LEADER, FOLLOWER]
@@ -424,7 +424,7 @@ for division in sorted_divisions:
     unkeyed_division['roles'].append(unkeyed_role)
   unkeyed_division['roles'] = sorted(unkeyed_division['roles'], key=lambda role: role['role'])
   unkeyed_by_division.append(unkeyed_division)
-unkeyed_by_division = sorted(unkeyed_by_division, key=lambda division: division['division'], reverse=True)
+unkeyed_by_division = sorted(unkeyed_by_division, key=lambda division: DIVISIONS_IN_SORT_ORDER.index(division['division']), reverse=False)
 
 database["top_dancers_by_points_gained_recently"] = unkeyed_by_division
 
