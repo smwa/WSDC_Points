@@ -265,7 +265,7 @@ def placementsToList(placements, raw_dancer):
                    earliest_event = competition_date
                 points = competition["points"]
                 if points is None:
-                   print("Found 'None' in points for dancer {}".format(dancer["dancer_wsdcid"]))
+                   print("Found 'None' in points for dancer {}".format(raw_dancer["dancer_wsdcid"]))
                    points = 0
                 event = {
                     **competition["event"],
